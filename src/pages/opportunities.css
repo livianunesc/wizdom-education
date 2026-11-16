@@ -1,0 +1,870 @@
+.opportunities-page,
+.calendar-page,
+.olympics-page {
+  width: 100%;
+}
+.op-heading-icon {
+  display: grid;
+  place-items: center;
+  width: 62px;
+  height: 62px;
+  background: var(--lavender, #e6e3f8);
+  border-radius: 19px;
+  color: var(--primary, #625b85);
+}
+.op-discover-banner {
+  display: flex;
+  align-items: center;
+  gap: 19px;
+  background: #eeeaf7;
+  border: 1px solid #e4deef;
+  border-radius: 18px;
+  padding: 24px 28px;
+  margin: 26px 0;
+}
+.op-banner-symbol {
+  flex-shrink: 0;
+  width: 47px;
+  height: 47px;
+  display: grid;
+  place-items: center;
+  border-radius: 15px;
+  background: #fff9;
+  color: #625b85;
+}
+.op-discover-banner h3 {
+  font-size: 16px;
+  margin: 0 0 6px;
+}
+.op-discover-banner p {
+  font-size: 13px;
+  color: #666673;
+  margin: 0;
+  line-height: 1.65;
+}
+.op-filters {
+  padding: 24px;
+  margin-bottom: 28px;
+}
+.op-filter-label {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  font-size: 13px;
+  margin-bottom: 20px;
+}
+.op-filter-grid {
+  display: grid;
+  grid-template-columns: 1.3fr 1fr 1fr;
+  gap: 20px;
+}
+.op-filter-grid select {
+  width: 100%;
+}
+.op-result-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+.op-result-heading h2 {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 19px;
+}
+.op-count {
+  font-size: 11px;
+  background: #eeecf2;
+  border-radius: 7px;
+  padding: 4px 7px;
+  font-weight: 600;
+  color: #625b85;
+}
+.op-data-note {
+  font-size: 11px;
+  line-height: 1.7;
+  color: #666673;
+  display: flex;
+  align-items: flex-start;
+  gap: 7px;
+  margin: 12px 0 22px;
+}
+.op-data-note svg {
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+.op-university-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 20px;
+}
+.university-card {
+  padding: 25px 23px;
+  display: flex;
+  flex-direction: column;
+}
+.university-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 21px;
+}
+.university-logo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 69px;
+  height: 58px;
+  border-radius: 13px;
+  font-size: 14px;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+  color: #48405e;
+}
+.tone-lavender {
+  background: #e6e3f8;
+}
+.tone-mint {
+  background: #e3f8ee;
+}
+.tone-peach {
+  background: #f8ece3;
+}
+.tone-blue {
+  background: #e3f1f8;
+}
+.tone-pink {
+  background: #f8e3e3;
+}
+.tone-pistachio {
+  background: #f4f8e3;
+}
+.save-university {
+  color: #898391 !important;
+}
+.save-university.saved {
+  color: #625b85 !important;
+  background: #eeebf6 !important;
+}
+.university-type {
+  font-size: 10px;
+  color: #666673;
+  display: flex;
+  gap: 7px;
+}
+.university-card h3 {
+  font-size: 16px;
+  line-height: 1.5;
+  margin: 8px 0;
+  min-height: 48px;
+}
+.university-location {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  color: #666673;
+  font-size: 11px;
+  margin: 0 0 23px;
+}
+.university-facts {
+  display: grid;
+  grid-template-columns: 1.5fr 1fr;
+  gap: 10px;
+  margin-top: auto;
+}
+.university-facts div {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+.university-facts span {
+  font-size: 10px;
+  color: #666673;
+}
+.university-facts strong {
+  font-size: 11px;
+  line-height: 1.6;
+  font-weight: 600;
+}
+.university-facts small {
+  font-size: 9px;
+  font-weight: 400;
+}
+.university-date {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #faf9fc;
+  border-radius: 8px;
+  padding: 11px 9px;
+  margin: 18px 0 16px;
+  font-size: 10px;
+  color: #666673;
+}
+.university-date strong {
+  color: #373743;
+}
+.university-details {
+  border: 0;
+  border-top: 1px solid #e8e5ed;
+  background: none;
+  text-align: left;
+  text-decoration: none;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  padding: 17px 0 0;
+  color: #625b85;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.op-empty {
+  padding: 60px 25px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+.op-empty h3,
+.op-empty p {
+  margin: 0;
+}
+.op-empty p {
+  max-width: 440px;
+  color: #666673;
+  font-size: 13px;
+  line-height: 1.8;
+}
+.op-detail-modal {
+  position: relative;
+  max-width: 540px;
+  display: flex;
+  flex-direction: column;
+  gap: 13px;
+  padding: 35px !important;
+}
+.op-detail-modal .eyebrow {
+  margin-top: 8px;
+}
+.op-detail-modal h2,
+.op-detail-modal p {
+  margin: 0;
+}
+.op-detail-modal > p:not(.op-data-note) {
+  font-size: 13px;
+  line-height: 1.8;
+}
+.op-modal-close {
+  position: absolute;
+  right: 18px;
+  top: 18px;
+}
+.op-modal-facts {
+  padding: 18px;
+  background: #faf9fc;
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.op-modal-facts p {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+.op-modal-facts span {
+  font-size: 10px;
+  color: #666673;
+}
+.op-modal-facts strong {
+  font-size: 12px;
+}
+.op-detail-modal .button {
+  justify-content: center;
+}
+.calendar-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 280px;
+  gap: 23px;
+  margin-top: 30px;
+}
+.calendar-main {
+  overflow: hidden;
+  align-self: start;
+  padding: 0 !important;
+}
+.calendar-toolbar {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  align-items: center;
+  padding: 24px 17px;
+}
+.calendar-month-title {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.calendar-month-title h2 {
+  font-size: 15px;
+  text-transform: capitalize;
+  white-space: nowrap;
+  margin: 0 5px;
+}
+.calendar-view-toggle {
+  display: flex;
+  background: #f5f3f8;
+  border-radius: 8px;
+  padding: 4px;
+}
+.calendar-view-toggle button {
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: #666673;
+  font-size: 11px;
+  padding: 7px 12px;
+  cursor: pointer;
+}
+.calendar-view-toggle button.active {
+  background: white;
+  color: #625b85;
+  box-shadow: 0 1px 3px #3737430a;
+}
+.calendar-weekdays,
+.calendar-day-grid {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+}
+.calendar-weekdays {
+  border-top: 1px solid #e8e5ed;
+  border-bottom: 1px solid #e8e5ed;
+  padding: 15px 0;
+}
+.calendar-weekdays span {
+  text-align: center;
+  font-size: 9px;
+  font-weight: 600;
+  color: #666673;
+}
+.calendar-day,
+.calendar-blank {
+  min-height: 100px;
+  border: 0;
+  border-bottom: 1px solid #eeecf2;
+  border-right: 1px solid #eeecf2;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 5px;
+  padding: 10px 6px;
+  background: white;
+  font-family: inherit;
+  cursor: pointer;
+  text-align: left;
+}
+.calendar-day:nth-child(7n) {
+  border-right: 0;
+}
+.calendar-day:hover,
+.calendar-day.selected {
+  background: #f7f4fc;
+}
+.calendar-date-number {
+  font-size: 11px;
+  font-weight: 500;
+  display: grid;
+  place-items: center;
+  width: 25px;
+  height: 25px;
+  border-radius: 8px;
+}
+.calendar-day.today .calendar-date-number {
+  background: #625b85;
+  color: #fff;
+}
+.calendar-day.selected:not(.today) .calendar-date-number {
+  background: #e6e3f8;
+  color: #625b85;
+}
+.calendar-event-chip {
+  width: 100%;
+  font-size: 9px;
+  color: #625b85;
+  background: #e6e3f8;
+  border-radius: 4px;
+  padding: 4px 3px;
+  line-height: 1.4;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.calendar-study-dot {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 8px;
+  color: #547665;
+  line-height: 1.4;
+}
+.calendar-study-dot i,
+.calendar-legend i {
+  display: inline-block;
+  flex-shrink: 0;
+  border-radius: 50%;
+  width: 5px;
+  height: 5px;
+  background: #9dcab2;
+}
+.calendar-legend {
+  display: flex;
+  gap: 18px;
+  flex-wrap: wrap;
+  font-size: 9px;
+  color: #666673;
+  padding: 18px;
+}
+.calendar-legend span {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+.calendar-legend i {
+  width: 7px;
+  height: 7px;
+}
+.calendar-legend .legend-lavender {
+  background: #9c8dc1;
+}
+.calendar-side {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+.calendar-selected {
+  padding: 24px;
+}
+.calendar-selected .eyebrow {
+  font-size: 9px;
+}
+.calendar-selected h2 {
+  font-size: 17px;
+  margin: 10px 0 25px;
+}
+.calendar-no-events {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  align-items: flex-start;
+  color: #77709b;
+}
+.calendar-no-events p {
+  font-size: 12px;
+  color: #373743;
+  line-height: 1.7;
+  margin: 0;
+}
+.calendar-no-events small {
+  font-size: 10px;
+  line-height: 1.8;
+  color: #666673;
+}
+.calendar-side-event {
+  display: flex;
+  gap: 12px;
+  padding: 16px 0;
+  border-top: 1px solid #eeecf2;
+  color: #625b85;
+}
+.calendar-side-event strong {
+  font-size: 12px;
+}
+.calendar-side-event p {
+  font-size: 11px;
+  color: #666673;
+  margin: 7px 0;
+}
+.calendar-side-event a {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 10px;
+  color: #625b85;
+}
+.calendar-kind-note {
+  background: #f4f8e3;
+  border-radius: 16px;
+  padding: 25px;
+  color: #616b45;
+}
+.calendar-kind-note h3 {
+  font-size: 14px;
+  line-height: 1.6;
+  margin: 13px 0 8px;
+}
+.calendar-kind-note p {
+  font-size: 11px;
+  line-height: 1.8;
+  margin: 0;
+  color: #686e5c;
+}
+.calendar-study-notice {
+  display: flex;
+  gap: 10px;
+  background: #e3f8ee;
+  border-radius: 10px;
+  padding: 14px;
+  margin-top: 20px;
+  color: #4e6f5f;
+}
+.calendar-study-notice svg {
+  flex-shrink: 0;
+}
+.calendar-study-notice strong {
+  font-size: 10px;
+}
+.calendar-study-notice p {
+  font-size: 10px;
+  line-height: 1.7;
+  margin: 5px 0 0;
+}
+.calendar-list-view {
+  min-height: 380px;
+  padding: 20px;
+}
+.calendar-list-event {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 20px 0;
+  border-bottom: 1px solid #e8e5ed;
+}
+.calendar-event-day {
+  background: #eeeaf7;
+  border-radius: 10px;
+  width: 46px;
+  min-width: 46px;
+  padding: 8px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  color: #625b85;
+}
+.calendar-event-day strong {
+  font-size: 18px;
+}
+.calendar-event-day span {
+  font-size: 9px;
+}
+.calendar-list-event h3 {
+  font-size: 13px;
+  margin: 0 0 6px;
+}
+.calendar-list-event p {
+  font-size: 10px;
+  margin: 0;
+}
+.calendar-list-event .button {
+  font-size: 9px;
+  margin-left: auto;
+}
+.calendar-list-view .empty-state {
+  padding: 70px 25px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 14px;
+  color: #666673;
+}
+.calendar-list-view .empty-state h3 {
+  color: #373743;
+  font-size: 16px;
+  margin: 0;
+}
+.calendar-list-view .empty-state p {
+  font-size: 12px;
+  margin: 0;
+  line-height: 1.7;
+}
+.olympics-categories {
+  display: flex;
+  gap: 9px;
+  flex-wrap: wrap;
+  margin: 25px 0;
+}
+.button.secondary.is-active {
+  background: #e6e3f8;
+  border-color: #d4cee8;
+  color: #625b85;
+}
+.olympics-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 22px;
+}
+.olympic-card {
+  padding: 27px;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+.olympic-card-icon {
+  width: 58px;
+  height: 58px;
+  border-radius: 16px;
+  display: grid;
+  place-items: center;
+  color: #625b85;
+  margin-bottom: 21px;
+}
+.olympic-card > .badge {
+  position: absolute;
+  top: 32px;
+  right: 25px;
+  font-size: 10px;
+  background: #f5f3f8;
+  color: #666673;
+  padding: 6px 10px;
+  border-radius: 7px;
+}
+.olympic-card h2 {
+  font-size: 22px;
+  margin: 0 0 7px;
+  letter-spacing: -0.6px;
+}
+.olympic-card h3 {
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1.65;
+  margin: 0 0 13px;
+  min-height: 38px;
+}
+.olympic-card > p.muted {
+  font-size: 12px;
+  line-height: 1.9;
+  margin: 0 0 24px;
+}
+.olympic-eligibility {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 10px;
+  color: #666673;
+  margin: auto 0 20px;
+}
+.olympic-eligibility svg {
+  flex-shrink: 0;
+}
+.olympics-eligibility {
+  max-width: 650px;
+  margin: 45px auto;
+  padding: 55px 45px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+}
+.olympics-eligibility > svg {
+  color: #77709b;
+}
+.olympics-eligibility h2 {
+  margin: 6px 0;
+  font-size: 24px;
+}
+.olympics-eligibility p {
+  font-size: 13px;
+  line-height: 1.9;
+  margin: 0;
+  max-width: 460px;
+}
+.olympics-eligibility .button {
+  margin-top: 15px;
+}
+@media (min-width: 1600px) {
+  .university-card h3 {
+    min-height: 0;
+  }
+  .calendar-day,
+  .calendar-blank {
+    min-height: 120px;
+  }
+}
+@media (max-width: 1200px) {
+  .op-university-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .calendar-layout {
+    grid-template-columns: minmax(0, 1fr) 230px;
+  }
+  .calendar-event-chip span {
+    display: none;
+  }
+  .calendar-study-dot span {
+    display: none;
+  }
+  .calendar-toolbar {
+    padding: 20px 10px;
+  }
+  .calendar-month-title h2 {
+    font-size: 13px;
+  }
+  .calendar-view-toggle button {
+    padding: 6px 9px;
+  }
+}
+@media (max-width: 900px) {
+  .calendar-layout {
+    grid-template-columns: 1fr;
+  }
+  .calendar-side {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+  }
+  .calendar-side > .op-data-note {
+    grid-column: 1/-1;
+  }
+  .calendar-no-events {
+    gap: 9px;
+  }
+  .calendar-selected h2 {
+    margin-bottom: 15px;
+  }
+  .calendar-day,
+  .calendar-blank {
+    min-height: 85px;
+  }
+  .op-filters {
+    padding: 20px;
+  }
+  .op-filter-grid {
+    gap: 12px;
+  }
+  .op-discover-banner {
+    padding: 20px;
+  }
+  .olympic-card {
+    padding: 22px;
+  }
+}
+@media (max-width: 600px) {
+  .op-heading-icon {
+    display: none;
+  }
+  .op-filter-grid {
+    grid-template-columns: 1fr;
+  }
+  .op-university-grid,
+  .olympics-grid {
+    grid-template-columns: 1fr;
+  }
+  .op-discover-banner {
+    gap: 13px;
+    padding: 20px 17px;
+  }
+  .op-discover-banner h3 {
+    font-size: 14px;
+  }
+  .op-discover-banner p {
+    font-size: 11px;
+  }
+  .op-banner-symbol {
+    width: 37px;
+    height: 37px;
+    border-radius: 11px;
+  }
+  .op-result-heading {
+    align-items: flex-start;
+    gap: 10px;
+  }
+  .op-result-heading h2 {
+    font-size: 16px;
+    line-height: 1.6;
+    margin-top: 8px;
+  }
+  .op-result-heading .button {
+    font-size: 10px;
+    white-space: nowrap;
+  }
+  .university-card h3 {
+    min-height: 0;
+  }
+  .university-card {
+    padding: 23px;
+  }
+  .university-facts strong {
+    font-size: 12px;
+  }
+  .calendar-toolbar {
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  .calendar-month-title {
+    justify-content: space-between;
+    width: 100%;
+  }
+  .calendar-view-toggle {
+    display: none;
+  }
+  .calendar-day,
+  .calendar-blank {
+    min-height: 70px;
+    padding: 7px 3px;
+  }
+  .calendar-event-chip {
+    font-size: 7px;
+  }
+  .calendar-date-number {
+    font-size: 10px;
+    width: 22px;
+    height: 22px;
+  }
+  .calendar-side {
+    grid-template-columns: 1fr;
+  }
+  .calendar-weekdays span {
+    font-size: 8px;
+  }
+  .calendar-legend {
+    gap: 13px;
+    font-size: 8px;
+  }
+  .calendar-selected {
+    padding: 22px;
+  }
+  .calendar-list-event {
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+  .calendar-list-event .button {
+    margin-left: 56px;
+  }
+  .op-detail-modal {
+    padding: 28px 22px !important;
+  }
+  .olympics-categories {
+    gap: 7px;
+  }
+  .olympics-categories .button {
+    font-size: 10px;
+    padding: 9px 12px;
+  }
+  .olympics-eligibility {
+    padding: 35px 22px;
+  }
+  .olympics-eligibility h2 {
+    font-size: 20px;
+  }
+  .olympic-card h3 {
+    min-height: 0;
+  }
+  .olympic-card > p.muted {
+    margin-bottom: 17px;
+  }
+}

@@ -1,0 +1,25 @@
+WIZDOM — SEU FUTURO, NO SEU RITMO
+
+1. Extraia todo o ZIP para uma pasta no seu computador.
+2. Dê dois cliques em index.html, na pasta principal (Chrome ou Edge).
+3. Não é preciso instalar Node.js, npm ou iniciar servidor.
+
+O app, as fontes, os ícones, os cronogramas e os flashcards funcionam offline.
+Mantenha a pasta provas junto ao index.html para abrir os PDFs incluídos.
+Links para o INEP e universidades precisam de internet.
+
+ENTRAR E EXPERIMENTAR
+Use Entrar para acessar ou criar uma conta local. Também existem duas
+contas demonstrativas: Júlia (Medicina) e Leo (Engenharia).
+Cadastro e progresso ficam somente no navegador e computador utilizados.
+Use uma senha de teste. Não há servidor nem sincronização de contas.
+
+ESTUDAR E REVISAR
+Responda ao formulário para criar um plano com dias, horários sugeridos,
+assuntos, atividades e pausas. Ajuste em Cronograma > Ajustar minha rotina.
+Marque Já estudei ou conclua ao menos um minuto de foco para liberar
+os flashcards do assunto. Você também pode registrar estudos em Revisões.
+
+PARA QUEM VAI EDITAR O CÓDIGO
+Use npm ci e npm run dev. Após editar src/, execute npm run build para
+atualizar o index.html pronto. Nunca edite esse HTML gerado manualmente.
