@@ -1,2 +1,399 @@
-.plan-personalized{display:flex;align-items:center;gap:20px;padding:25px 28px;border-radius:24px;background:linear-gradient(110deg,#ede8fb,#e2f1ed);margin-bottom:14px;border:1px solid #ddd7ed}.plan-personalized-icon{display:grid;place-items:center;width:58px;height:58px;background:#fff9;border-radius:19px;color:#7464a4;flex-shrink:0}.plan-personalized h2{font-size:24px;margin:5px 0}.plan-personalized p{font-size:13px;color:#626277;margin:6px 0}.plan-week-total{display:flex;flex-direction:column;text-align:right;margin-left:auto;white-space:nowrap;gap:5px}.plan-week-total strong{font-size:27px}.plan-week-total span{font-size:12px;color:#69657a}.plan-rationale{font-size:13px;color:#666277;margin:18px 6px 25px;line-height:1.8}.plan-rationale summary{cursor:pointer;color:#68578b;font-weight:700;list-style-position:inside}.plan-rationale ul{padding-left:22px}.plan-rationale p{font-size:12px}.plan-week{padding:24px}.plan-week .section-heading h2{font-size:19px;margin-top:4px}.plan-day-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:10px;margin-top:22px}.plan-day{border:1px solid #e7e2ed;background:#fcfbfd;padding:14px 8px;border-radius:17px;display:flex;flex-direction:column;align-items:center;gap:7px;transition:transform .2s,background .2s;min-height:145px;color:inherit}.plan-day>span:first-child{font-size:12px;color:#777184}.plan-day strong{font-size:27px;line-height:1.2}.plan-day small{font-size:11px;color:#81778f}.plan-day.selected{background:#71618e;border-color:#71618e;color:white;box-shadow:0 7px 17px #71618e25;transform:translateY(-3px)}.plan-day.selected>span:first-child,.plan-day.selected small{color:#f1eafb}.plan-day.is-today:not(.selected){border-color:#9580b1;background:#f3effa}.plan-day-dots{display:flex;gap:4px;height:9px;margin-top:3px}.plan-day-dots i{width:7px;height:7px;border-radius:50%;display:block}.plan-date-title{margin:30px 0 18px}.plan-date-title h2{font-size:23px;text-transform:capitalize;margin:4px 0 0}.plan-task{display:flex;align-items:flex-start;gap:25px;padding:25px}.plan-task.is-complete{border-color:#b3d1bd;background:#fcfffd}.plan-task-time{display:flex;align-items:center;flex-direction:column;gap:7px;color:#7c738a;font-size:12px;min-width:44px;padding-top:4px}.plan-task-time i{height:42px;width:1px;background:linear-gradient(#bdb0d3,#e5deef)}.plan-task-body{flex:1}.plan-task-meta{display:flex;align-items:center;gap:12px;flex-wrap:wrap}.plan-task-meta>span:not(.badge){display:flex;align-items:center;gap:5px;font-size:11px;color:#81778c}.plan-task h3{font-size:19px;margin:12px 0 7px}.plan-task-body>p{font-size:13px;line-height:1.6;color:#777183;margin:0}.plan-activity{background:#f6f3fa;border-radius:13px;padding:12px 14px;margin-top:16px}.plan-activity strong{font-size:11px;color:#76618e;text-transform:uppercase;letter-spacing:.08em}.plan-activity p{font-size:13px;line-height:1.65;margin:4px 0 0;color:#6b6477}.plan-task-actions{display:flex;flex-direction:column;gap:9px;padding-top:1px;flex-shrink:0}.plan-task-actions .button{font-size:12px;padding:11px 15px}.plan-task-meta .plan-completed-label{color:#50805c!important;font-weight:700}.plan-break{display:flex;align-items:center;justify-content:center;gap:7px;padding:15px;color:#8b8096;font-size:11px}.plan-task-list>div:last-child{margin-bottom:22px}.plan-rest{text-align:center;padding:48px 24px;margin-bottom:22px;color:#7c718b}.plan-rest>svg{color:#77a78b}.plan-rest h2{font-size:22px;color:#51485e}.plan-rest p{max-width:480px;margin:10px auto 22px;font-size:14px;line-height:1.7}.plan-task-actions button:disabled{opacity:.55;cursor:default}
-@media(max-width:1000px){.plan-task{gap:17px;flex-wrap:wrap}.plan-task-actions{flex-direction:row;margin-left:61px}.plan-task-body{min-width:calc(100% - 80px)}.plan-personalized{flex-wrap:wrap}.plan-week-total{margin-left:78px;text-align:left}.plan-day-grid{gap:5px}.plan-day{padding:12px 3px}}@media(max-width:600px){.plan-personalized{padding:20px;gap:12px}.plan-personalized h2{font-size:21px}.plan-week-total{margin-left:0}.plan-week-total strong{font-size:22px}.plan-week{padding:16px}.plan-week .section-heading{align-items:flex-start;gap:12px;flex-wrap:wrap}.plan-day-grid{gap:4px}.plan-day{min-height:125px;border-radius:12px}.plan-day strong{font-size:23px}.plan-day small{font-size:9px}.plan-day>span:first-child{font-size:10px}.plan-task{padding:18px;gap:12px}.plan-task h3{font-size:17px}.plan-task-actions{margin-left:0;width:100%;flex-wrap:wrap}.plan-task-actions .button{flex:1;white-space:nowrap}.plan-task-time{min-width:38px;font-size:10px}.plan-task-meta{gap:7px}.plan-task-body{min-width:calc(100% - 55px)}.plan-date-title h2{font-size:19px}.plan-break{font-size:10px;text-align:center}.plan-rationale{margin:13px 2px 20px}}
+.schedule-heading {
+  justify-content: flex-start;
+  gap: 1rem;
+}
+
+.schedule-heading-icon,
+.plan-personalized-icon {
+  display: grid;
+  flex: 0 0 auto;
+  place-items: center;
+  width: 56px;
+  height: 56px;
+  border-radius: 17px;
+  background: var(--lavender);
+  color: var(--primary);
+}
+
+.schedule-heading-copy {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.schedule-page > section.plan-personalized {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: clamp(1rem, 2.5vw, 1.65rem);
+  margin-bottom: .8rem;
+  border: 1px solid #354777;
+  border-radius: 18px;
+  background: linear-gradient(112deg, #202a53 10%, #384679 100%);
+  color: #fff;
+}
+
+.plan-personalized-icon {
+  width: 45px;
+  height: 45px;
+  border-radius: 12px;
+  background: #415185;
+  color: #a6f1d9;
+}
+
+.plan-personalized-copy {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.plan-personalized h2 {
+  font-size: clamp(1.25rem, 3vw, 1.65rem);
+  margin: 0;
+}
+
+.plan-personalized p,
+.plan-week-total span {
+  color: #e2e8ff;
+  font-size: .88rem;
+  line-height: 1.5;
+}
+
+.plan-personalized p {
+  margin: .35rem 0 0;
+}
+
+.plan-week-total {
+  display: grid;
+  gap: .2rem;
+  flex: 0 0 auto;
+  padding: .55rem 0 .55rem 1rem;
+  border-left: 1px solid #adb9ef61;
+}
+
+.plan-week-total strong {
+  font-size: clamp(1.4rem, 3vw, 1.8rem);
+  color: #a6f1d9;
+}
+
+.plan-week-total span {
+  font-size: .81rem;
+}
+
+.plan-rationale {
+  margin: 0 0 1.4rem;
+  color: var(--secondary);
+  font-size: .9rem;
+  line-height: 1.55;
+}
+
+.plan-rationale summary {
+  padding: .45rem 0;
+  cursor: pointer;
+  color: var(--primary);
+  font-weight: 700;
+}
+
+.plan-rationale ul {
+  padding-left: 1.35rem;
+}
+
+.plan-week {
+  padding: clamp(.8rem, 2vw, 1.45rem);
+}
+
+.plan-week .section-heading h2 {
+  font-size: clamp(1.05rem, 2.5vw, 1.35rem);
+  margin: .25rem 0 0;
+}
+
+.plan-day-grid {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: clamp(4px, 1vw, 12px);
+  margin-top: 1rem;
+}
+
+.plan-day {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: .35rem;
+  min-height: 105px;
+  padding: .7rem 2px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--background);
+  color: var(--text);
+}
+
+.plan-day>span:first-child,
+.plan-day small {
+  color: var(--secondary);
+  font-size: .82rem;
+}
+
+.plan-day strong {
+  font-size: clamp(1.25rem, 3vw, 1.65rem);
+  line-height: 1.2;
+}
+
+.plan-day.selected {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: #fff;
+}
+
+.plan-day.selected > span:first-child,
+.plan-day.selected small {
+  color: #fff;
+}
+
+.plan-day.is-today:not(.selected) {
+  border-color: var(--primary);
+}
+
+.plan-day-dots {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 3px;
+}
+
+.plan-day-dots i {
+  display: block;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #664bb9;
+}
+
+.plan-day-dots .mint { background: #53a88a; }
+.plan-day-dots .peach { background: #bd721f; }
+.plan-day-dots .blue { background: #496cbd; }
+.plan-day.selected .plan-day-dots i { background: #cae9e7; }
+
+.plan-date-title {
+  margin: 1.5rem 0 .75rem;
+}
+
+.plan-date-title h2 {
+  font-size: clamp(1.2rem, 3vw, 1.55rem);
+  margin: 0;
+}
+
+.plan-date-title h2::first-letter {
+  text-transform: uppercase;
+}
+
+.plan-task {
+  display: grid;
+  grid-template-columns: 56px minmax(0, 1fr) auto;
+  align-items: start;
+  gap: clamp(.7rem, 2vw, 1.3rem);
+  padding: clamp(.8rem, 2vw, 1.4rem);
+}
+
+.schedule-page .plan-task.is-complete {
+  border-color: #a9d6c7;
+  background: color-mix(in srgb, #dff4ec 20%, var(--surface));
+}
+
+.plan-task-time {
+  display: grid;
+  justify-items: center;
+  gap: .32rem;
+  padding-top: .25rem;
+  color: var(--secondary);
+  font-size: .82rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.plan-task-time i {
+  width: 1px;
+  height: 35px;
+  background: var(--border);
+}
+
+.plan-task-meta,
+.plan-task-meta > span:not(.badge) {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: .35rem;
+}
+
+.plan-task-meta {
+  gap: .45rem .65rem;
+  margin-bottom: .55rem;
+}
+
+.plan-task-meta > span:not(.badge) {
+  color: var(--secondary);
+  font-size: .8rem;
+}
+
+.plan-task-meta > span.plan-completed-label {
+  border-radius: 6px;
+  background: #dff4ec;
+  color: #145b48;
+  padding: .22rem .4rem;
+  font-weight: 700;
+}
+
+.plan-task h3 {
+  line-height: 1.25;
+  font-size: 1.2rem;
+  margin: 0;
+}
+
+.plan-task-body > p,
+.plan-activity p {
+  font-size: .93rem;
+  line-height: 1.55;
+  margin: .4rem 0 0;
+  color: var(--secondary);
+}
+
+.plan-activity {
+  padding: .7rem .85rem;
+  margin-top: .7rem;
+  border-radius: 10px;
+  background: var(--background);
+}
+
+.plan-activity strong {
+  color: var(--primary);
+  font-size: .85rem;
+}
+
+.plan-task-actions {
+  min-width: 144px;
+  max-width: 206px;
+  display: flex;
+  flex-direction: column;
+  gap: .45rem;
+}
+
+.plan-task-actions .button {
+  min-height: 44px;
+  font-size: .9rem;
+  justify-content: center;
+}
+
+.plan-task-actions button:disabled {
+  opacity: .65;
+  cursor: default;
+}
+
+.plan-break {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: .45rem;
+  padding: .7rem;
+  color: var(--secondary);
+  font-size: .82rem;
+  text-align: center;
+}
+
+.plan-break svg {
+  flex: none;
+}
+
+.plan-task-list > div:last-child,
+.plan-rest {
+  margin-bottom: 1rem;
+}
+
+.plan-rest {
+  padding: clamp(1.3rem, 3vw, 2rem);
+  text-align: center;
+}
+
+.plan-rest > svg {
+  color: #247260;
+}
+
+.plan-rest h2 {
+  margin: .55rem 0 0;
+  font-size: 1.3rem;
+}
+
+.plan-rest p {
+  margin: .45rem auto 1rem;
+  max-width: 480px;
+  color: var(--secondary);
+}
+
+@media (max-width: 850px) {
+  .plan-task {
+    grid-template-columns: 45px minmax(0, 1fr);
+  }
+
+  .plan-task-actions {
+    flex-direction: row;
+    flex-wrap: wrap;
+    grid-column: 2;
+    max-width: none;
+  }
+}
+
+@media (max-width: 600px) {
+  .schedule-heading,
+  .plan-week .section-heading {
+    flex-wrap: wrap;
+  }
+
+  .schedule-heading {
+    gap: .65rem;
+  }
+
+  .schedule-heading-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+  }
+
+  .schedule-heading-icon svg {
+    width: 23px;
+  }
+
+  .schedule-heading > button {
+    margin-left: 3.85rem;
+  }
+
+  .plan-personalized {
+    flex-wrap: wrap;
+  }
+
+  .plan-personalized-copy {
+    flex-basis: calc(100% - 4rem);
+  }
+
+  .plan-week-total {
+    border-left: 0;
+    border-top: 1px solid #adb9ef61;
+    padding: .55rem 0 0;
+    width: 100%;
+  }
+
+  .plan-day {
+    min-height: 80px;
+    border-radius: 9px;
+  }
+
+  .plan-day > span:first-child,
+  .plan-day small {
+    font-size: .69rem;
+  }
+
+  .plan-task-actions {
+    grid-column: 1 / -1;
+    min-width: 0;
+  }
+}
+
+@media (forced-colors: active) {
+  .plan-day.selected {
+    border: 2px solid Highlight;
+  }
+}

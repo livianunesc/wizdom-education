@@ -4,4 +4,5 @@ import App from "./App.jsx";
 import "./styles.css";
 import "./polish.css";
 import "./notebook.css";
+import "./studio.css";
 createRoot(document.getElementById("root")).render(<App />);

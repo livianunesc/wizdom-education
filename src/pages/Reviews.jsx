@@ -1,74 +1,259 @@
-import { credit } from "../rewards.js";
-import FlashRound from "./FlashRound.jsx";
 import { useState } from 'react';
-import { BookOpen, ArrowRight, Check, X, Flame, Target, Layers, RotateCcw, Sparkles, Plus, Clock3 } from 'lucide-react';
-import Select from '../Select.jsx';
-import { topics, topicById } from '../curriculum.js';
-import { flashcards } from '../flashcards-data.js';
-import { dayKey } from '../lib.js';
-import { learningState, streakFor, recordAnswer, noteActivity } from '../learning.js';
+import {
+  ArrowRight, BookOpen, Check, Clock3, Flame, Layers, ListChecks, RotateCcw, Sparkles, Target,
+} from 'lucide-react';
 import Celebration, { StreakWeek } from '../Celebration.jsx';
+import Select from '../Select.jsx';
+import { curriculum, topics, topicById } from '../curriculum.js';
+import { flashDeck } from '../flash-round.js';
+import { flashcards } from '../flashcards-data.js';
+import { learningState, noteActivity, recordAnswer, streakFor } from '../learning.js';
+import { dayKey } from '../lib.js';
+import { credit } from '../rewards.js';
+import FlashRound from './FlashRound.jsx';
 import './reviews.css';
 
-export default function Reviews({ learning: value, setLearning, stats, setStats, onStudy, authenticated }) {
-  const [mode, setMode] = useState("questions");
+export default function Reviews({
+  learning: value, setLearning, stats, setStats, onStudy, authenticated, initialMode, initialTopic, initialLevel,
+}) {
   const learning = learningState(value);
-  const [topic, setTopic] = useState(topics[0]?.id || '');
-  const [filter, setFilter] = useState('all');
+  const entryTopic = topicById(initialTopic);
+  const unlocked = new Set(learning.topics.map(item => item.topicId));
+  const available = flashcards.filter(card => unlocked.has(card.topicId) || learning.records[card.id]);
+  const reviewTopics = [...new Set(available.map(card => card.topicId))];
+  const [mode, setMode] = useState(initialMode === 'flash' ? 'flash' : 'questions');
+  const [topic, setTopic] = useState(entryTopic?.id || topics[0].id);
+  const [subject, setSubject] = useState(entryTopic?.subject || Object.keys(curriculum)[0]);
+  const [filter, setFilter] = useState(reviewTopics.includes(initialTopic) ? initialTopic : 'all');
   const [session, setSession] = useState(null);
   const [selected, setSelected] = useState(null);
   const [feedback, setFeedback] = useState(null);
   const [result, setResult] = useState(null);
-  const unlocked = new Set(learning.topics.map(t=>t.topicId));
-  const available = flashcards.filter(c=>unlocked.has(c.topicId));
-  const filtered = available.filter(c=>filter==='all'||c.topicId===filter);
-  const due = filtered.filter(c=>!learning.records[c.id]?.due || learning.records[c.id].due <= dayKey());
-  const correct = learning.answers.filter(a=>a.correct).length;
+  const filtered = available.filter(card => filter === 'all' || card.topicId === filter);
+  const due = filtered.filter(card => !learning.records[card.id]?.due || learning.records[card.id].due <= dayKey());
+  const correct = learning.answers.filter(answer => answer.correct).length;
   const errors = learning.answers.length - correct;
-  const rate = learning.answers.length ? Math.round(100*correct/learning.answers.length) : null;
-  const card = session && session.cards[session.index];
-  function start(practice=false) {
-    const cards = (practice ? filtered : due).slice(0,9);
+  const rate = learning.answers.length ? Math.round(100 * correct / learning.answers.length) : null;
+  const card = session?.cards[session.index];
+  const cardTopic = card && topicById(card.topicId);
+  const streak = streakFor(stats);
+  const entryCards = entryTopic
+    ? flashcards.filter(card => card.topicId === entryTopic.id && (!initialLevel || card.level === initialLevel))
+    : [];
+
+  function start(cards) {
     if (!cards.length) return;
-    setSession({cards,index:0,correct:0,xp:0}); setSelected(null); setFeedback(null);
+    setSession({ cards: cards.slice(0, 9), index: 0, correct: 0, xp: 0 });
+    setSelected(null);
+    setFeedback(null);
+    window.scrollTo(0, 0);
   }
+
   function answer() {
     if (selected === null || feedback) return;
     const isCorrect = selected === card.answer;
-    const {state,xp} = recordAnswer(learning,card,isCorrect);
+    const { state, xp } = recordAnswer(learning, card, isCorrect);
     setLearning(state);
     const day = dayKey();
-    setStats(stats => {
-      const earned = credit(noteActivity(stats), { id: `question:${day}:${card.id}`, xp, label: 'Questão · ' + topicById(card.topicId)?.subject, day });
-      return authenticated ? credit(earned, { id: 'review:' + day, xp: 5, coins: 2, label: 'Missão diária · revisar um assunto', day }) : earned;
+    setStats(current => {
+      const earned = credit(noteActivity(current), { id: `question:${day}:${card.id}`, xp, label: 'Questão · ' + cardTopic?.subject, day });
+      return authenticated
+        ? credit(earned, { id: 'review:' + day, xp: 5, coins: 2, label: 'Missão diária · revisar um assunto', day })
+        : earned;
     });
-    setFeedback({correct:isCorrect,xp});
+    setFeedback({ correct: isCorrect, xp });
   }
+
   function next() {
-    const summary={correct:session.correct+Number(feedback.correct),xp:session.xp+feedback.xp};
-    if(session.index+1>=session.cards.length) {
-      setResult({...summary,total:session.cards.length,title:'Sua sessão de flashcards está concluída.'}); setSession(null);
-    } else setSession({...session,...summary,index:session.index+1});
-    setSelected(null); setFeedback(null);
+    const summary = { correct: session.correct + Number(feedback.correct), xp: session.xp + feedback.xp };
+    if (session.index + 1 >= session.cards.length) {
+      setResult({ ...summary, total: session.cards.length, title: 'Sua revisão está concluída.' });
+      setSession(null);
+    } else {
+      setSession({ ...session, ...summary, index: session.index + 1 });
+    }
+    setSelected(null);
+    setFeedback(null);
   }
-  return <div className="reviews-page">
-    <div className="page-heading"><div><span className="eyebrow">CONHECIMENTO QUE FICA</span><h1>Relembrar é evoluir<span className="accent-dot">.</span></h1><p className="muted">Do seu estudo para a memória. Uma pequena conquista por vez.</p></div><span className="badge peach"><Flame size={16}/>{streakFor(stats)} {streakFor(stats)===1?"dia":"dias"} de ofensiva</span></div>
-    <div className="notebook-actions"><button className="button secondary" aria-pressed={mode === "questions"} onClick={() => setMode("questions")}>Questões</button><button className="button secondary" aria-pressed={mode === "flash"} onClick={() => setMode("flash")}>Flashcards com tempo</button></div>
-    {mode === "flash" ? <FlashRound stats={stats} setStats={setStats} /> : <>
-    <div className="review-metrics"><div><span className="small-icon mint"><Target size={20}/></span><strong>{rate===null?'—':rate+'%'}</strong><span>taxa de acerto</span></div><div><span className="small-icon lavender"><Check size={20}/></span><strong>{correct}</strong><span>acertos</span></div><div><span className="small-icon pink"><RotateCcw size={20}/></span><strong>{errors}</strong><span>erros para aprender</span></div><div><span className="small-icon peach"><Layers size={20}/></span><strong>{due.length}</strong><span>cartões para hoje</span></div></div>
-    {session ? <section className="review-session card">
-      <div className="section-heading"><button className="text-button" onClick={()=>{setSession(null);setFeedback(null);}}>← Sair da revisão</button><span className="muted">{session.index+1} de {session.cards.length}</span></div>
-      <div className="review-progress"><i style={{width:`${(session.index+1)/session.cards.length*100}%`}}/></div>
-      <div className={`knowledge-card level-${card.level}`} key={card.id}><span className="badge white-badge">{topicById(card.topicId)?.subject} · {card.level}</span><div className="knowledge-decor" aria-hidden="true"><BookOpen size={70}/></div><small>{topicById(card.topicId)?.title}</small><h2>{card.question}</h2><span className="knowledge-hint">Pense com calma. Aprender também é tentar.</span></div>
-      <div className="answer-options">{card.options.map((option,i)=><button key={i} aria-pressed={selected===i} disabled={!!feedback} className={`${selected===i?'chosen':''} ${feedback&&i===card.answer?'correct':''} ${feedback&&selected===i&&!feedback.correct?'incorrect':''}`} onClick={()=>setSelected(i)}><span>{'ABCD'[i]}</span>{option}{feedback&&i===card.answer&&<Check size={20}/>}</button>)}</div>
-      {feedback && <div className={`answer-feedback ${feedback.correct?'success':'retry'}`} role="status"><strong>{feedback.correct?'Acertou! Muito bem.':'Tudo bem errar. Vamos entender?'}</strong><p>{card.explanation}</p><small>Próxima revisão: {learning.records[card.id]?.due?.split('-').reverse().join('/')} · +{feedback.xp} XP</small></div>}
-      <div className="review-session-footer"><span className="muted"><Sparkles size={16}/> {session.xp+(feedback?.xp||0)} XP nesta sessão</span>{feedback?<button className="button primary" onClick={next}>{session.index+1===session.cards.length?'Concluir revisão':'Próximo cartão'} <ArrowRight size={17}/></button>:<button className="button primary" onClick={answer} disabled={selected===null}>Conferir resposta <Check size={17}/></button>}</div>
-    </section> : <div className="review-home-grid"><div>
-      <section className="review-start-banner"><div><span className="eyebrow">SUA PRÓXIMA CONQUISTA</span><h2>Um pouco hoje.<br/>Muito mais na memória.</h2><p>{available.length?`${due.length} cartões esperam por você. Revise em sessões de até 9 perguntas.`:'Marque um assunto como estudado para desbloquear seus primeiros cartões.'}</p><div className="review-start-controls"><Select aria-label="Filtrar assunto da revisão" value={filter} onChange={e=>setFilter(e.target.value)}><option value="all">Todos os assuntos estudados</option>{learning.topics.map(t=><option key={t.topicId} value={t.topicId}>{topicById(t.topicId)?.title || t.topicId}</option>)}</Select><button className="button primary" disabled={!due.length} onClick={()=>start()}>Revisar agora <ArrowRight size={17}/></button>{!!filtered.length&&!due.length&&<button className="button secondary" onClick={()=>start(true)}>Praticar novamente</button>}</div></div><div className="stacked-cards" aria-hidden="true"><div/><div/><div><BookOpen size={38}/><span>Uma ideia.<br/>Uma descoberta.</span><b>✦</b></div></div></section>
-      <section className="card register-study"><div className="section-heading"><div><h2>O que você estudou?</h2><p className="muted">Traga também os assuntos que estudou fora da plataforma.</p></div><Plus size={22}/></div><Select aria-label="Assunto estudado" value={topic} onChange={e=>setTopic(e.target.value)}>{topics.map(t=><option key={t.id} value={t.id}>{t.subject} · {t.title}</option>)}</Select><button className="button secondary" onClick={()=>{onStudy({topicId:topic,...topicById(topic)},false);setFilter(topic);}}>Estudei este assunto <Check size={17}/></button><p className="muted review-note">Cada assunto libera 3 cartões autorais: fundamental, intermediário e desafiador.</p></section>
-      <section className="card learned-topics"><h2>Sua trilha de conhecimento</h2>{learning.topics.length?<div className="learned-topic-grid">{learning.topics.map(t=>{const item=topicById(t.topicId);const cards=available.filter(c=>c.topicId===t.topicId);const count=cards.filter(c=>learning.records[c.id]).length;return <button key={t.topicId} onClick={()=>setFilter(t.topicId)} className={filter===t.topicId?'active':''}><span className="small-icon lavender"><BookOpen size={18}/></span><strong>{item?.title}</strong><small>{item?.subject} · {count}/3 cartões praticados</small><div className="progress-track"><i style={{width:`${count/3*100}%`}}/></div></button>})}</div>:<div className="review-empty"><Layers size={34}/><p>Sua trilha começa no primeiro assunto estudado.</p></div>}</section>
-    </div><aside><section className="card streak-card"><span className="streak-flame"><Flame size={40} fill="currentColor"/></span><h2>{streakFor(stats)} {streakFor(stats)===1?"dia":"dias"} de ofensiva</h2><p className="muted">Estude, pratique ou conclua um minuto de foco para acender o dia.</p><StreakWeek stats={stats}/><div className="streak-goal"><strong>Próximo marco: {streakFor(stats)<7?7:streakFor(stats)<14?14:30} dias</strong><p>Seu ritmo tem valor, mesmo quando você recomeça.</p></div></section><section className="card spaced-note"><Clock3 size={24}/><h3>Revisar na hora certa</h3><p className="muted">Errou? O cartão volta amanhã. Acertou? Ele volta em 3 dias, depois 6, 12 e até 30 dias.</p><p className="muted">Você pode praticar antes. Cada cartão concede XP uma vez por dia.</p></section></aside></div>}
-    {result&&<Celebration result={result} stats={stats} onClose={()=>setResult(null)}/>}
-    </>}
-  </div>;
+
+  return (
+    <div className="reviews-page">
+      <div className="page-heading">
+        <div>
+          <h1>Questões e revisões</h1>
+          <p className="muted">Pratique por assunto ou teste sua memória em uma rodada rápida.</p>
+        </div>
+        <span className="review-streak"><Flame size={17} /> {streak} {streak === 1 ? 'dia' : 'dias'} de ofensiva</span>
+      </div>
+
+      {mode === 'questions' && !session && entryCards.length > 0 && (
+        <section className="card review-start-banner review-entry">
+          <div>
+            <h2>{entryTopic.title}</h2>
+            <p className="muted">{entryTopic.subject}{initialLevel && ` · ${initialLevel}`}</p>
+          </div>
+          <button className="button primary" onClick={() => start(entryCards)}>Começar prática <ArrowRight size={17} /></button>
+        </section>
+      )}
+
+      {!session && (
+        <div className="review-mode-grid" role="group" aria-label="Modo de prática">
+          <button className="review-mode question-mode" aria-pressed={mode === 'questions'} aria-label="Questões" aria-controls="question-practice" onClick={() => setMode('questions')}>
+            <span className="review-mode-copy">
+              <strong>Questões</strong>
+              <span>{flashcards.length} exercícios autorais</span>
+              <small>Pratique por assunto e confira as explicações.</small>
+            </span>
+            <span className="review-mode-art" aria-hidden="true"><ListChecks size={44} strokeWidth={1.6} /></span>
+            <ArrowRight className="review-mode-arrow" size={18} aria-hidden="true" />
+          </button>
+          <button className="review-mode flash-mode" aria-pressed={mode === 'flash'} aria-label="Flashcards com tempo" aria-controls="flash-practice" onClick={() => setMode('flash')}>
+            <span className="review-mode-copy">
+              <strong>Flashcards com tempo</strong>
+              <span>{flashDeck.length} cartões de memória</span>
+              <small>Responda contra o relógio ou pratique no seu ritmo.</small>
+            </span>
+            <span className="review-mode-art" aria-hidden="true"><Clock3 size={43} strokeWidth={1.6} /></span>
+            <ArrowRight className="review-mode-arrow" size={18} aria-hidden="true" />
+          </button>
+        </div>
+      )}
+
+      <div id="flash-practice" hidden={mode !== 'flash'}>
+        {mode === 'flash' && <FlashRound stats={stats} setStats={setStats} />}
+      </div>
+
+      <div id="question-practice" hidden={mode !== 'questions'}>
+        {mode === 'questions' && (session ? (
+          <section className="card review-session">
+            <div className="section-heading">
+              <button className="text-button" onClick={() => setSession(null)}>← Sair da revisão</button>
+              <span className="muted">{session.index + 1} de {session.cards.length}</span>
+            </div>
+            <div className="review-progress" aria-hidden="true">
+              <i style={{ width: `${(session.index + 1) / session.cards.length * 100}%` }} />
+            </div>
+            <div className="knowledge-card" key={card.id}>
+              <span className="badge white-badge">{cardTopic?.subject} · {card.level}</span>
+              <div className="knowledge-decor" aria-hidden="true"><BookOpen size={70} /></div>
+              <small>{cardTopic?.title}</small>
+              <h2>{card.question}</h2>
+            </div>
+            <div className="answer-options">
+              {card.options.map((option, index) => (
+                <button key={option} aria-pressed={selected === index} disabled={!!feedback}
+                  className={`${selected === index ? 'chosen' : ''} ${feedback && index === card.answer ? 'correct' : ''} ${feedback && selected === index && !feedback.correct ? 'incorrect' : ''}`}
+                  onClick={() => setSelected(index)}>
+                  <span>{'ABCD'[index]}</span>{option}{feedback && index === card.answer && <Check size={20} />}
+                </button>
+              ))}
+            </div>
+            {feedback && (
+              <div className={`answer-feedback ${feedback.correct ? 'success' : 'retry'}`} role="status">
+                <strong>{feedback.correct ? 'Acertou! Muito bem.' : 'Tudo bem errar. Vamos entender?'}</strong>
+                <p>{card.explanation}</p>
+                <small>Próxima revisão: {learning.records[card.id]?.due?.split('-').reverse().join('/')} · +{feedback.xp} XP</small>
+              </div>
+            )}
+            <div className="review-session-footer">
+              <span className="muted"><Sparkles size={16} /> {session.xp + (feedback?.xp || 0)} XP nesta sessão</span>
+              {feedback
+                ? <button className="button primary" onClick={next}>{session.index + 1 === session.cards.length ? 'Concluir revisão' : 'Próximo cartão'} <ArrowRight size={17} /></button>
+                : <button className="button primary" onClick={answer} disabled={selected === null}>Conferir resposta <Check size={17} /></button>}
+            </div>
+          </section>
+        ) : (
+          <>
+            <div className="review-metrics" aria-label="Seu desempenho em questões">
+              <div><span className="small-icon"><Target size={20} /></span><strong>{rate === null ? '—' : rate + '%'}</strong><span>taxa de acerto</span></div>
+              <div><span className="small-icon"><Check size={20} /></span><strong>{correct}</strong><span>acertos</span></div>
+              <div><span className="small-icon"><RotateCcw size={20} /></span><strong>{errors}</strong><span>respostas incorretas</span></div>
+              <div><span className="small-icon"><Layers size={20} /></span><strong>{due.length}</strong><span>{due.length === 1 ? 'cartão para hoje' : 'cartões para hoje'}</span></div>
+            </div>
+            <div className="review-home-grid">
+              <div>
+                <section className="card review-start-banner">
+                  <div>
+                    <h2>Minha fila de revisão</h2>
+                    <p>{available.length ? `${due.length} ${due.length === 1 ? 'questão disponível' : 'questões disponíveis'} para revisão agora.` : <>Pratique por disciplina ou <a href="#register-study">registre um estudo</a> para preencher sua fila.</>}</p>
+                    <div className="review-start-controls">
+                      <Select aria-label="Filtrar assunto da revisão" value={filter} onChange={event => setFilter(event.target.value)}>
+                        <option value="all">Todos os assuntos</option>
+                        {reviewTopics.map(id => <option key={id} value={id}>{topicById(id)?.title || id}</option>)}
+                      </Select>
+                      <button className="button primary" disabled={!due.length} onClick={() => start(due)}>Revisar agora <ArrowRight size={17} /></button>
+                      {!!filtered.length && !due.length && <button className="button secondary" onClick={() => start(filtered)}>Praticar novamente</button>}
+                    </div>
+                  </div>
+                </section>
+                <section className="card review-catalog">
+                  <div className="section-heading">
+                    <div><h2>Pratique por disciplina</h2><p className="muted">Questões organizadas por assunto, com correção comentada.</p></div>
+                    <Select aria-label="Disciplina das questões" value={subject} onChange={event => setSubject(event.target.value)}>
+                      {Object.keys(curriculum).map(name => <option key={name}>{name}</option>)}
+                    </Select>
+                  </div>
+                  <ul>
+                    {curriculum[subject].map(item => {
+                      const cards = flashcards.filter(card => card.topicId === item.id);
+                      return (
+                        <li key={item.id}>
+                          <div><strong>{item.title}</strong><small>{cards.length} questões · {cards.filter(card => learning.records[card.id]).length} praticadas</small></div>
+                          <button className="button secondary" aria-label={`Praticar ${item.title}`} onClick={() => start(cards)}>
+                            Praticar <ArrowRight size={15} />
+                          </button>
+                        </li>
+                      );
+                    })}
+                  </ul>
+                </section>
+                <section className="card learned-topics">
+                  <h2>Assuntos estudados</h2>
+                  {learning.topics.length ? (
+                    <div className="learned-topic-grid">
+                      {learning.topics.map(item => {
+                        const topic = topicById(item.topicId);
+                        const cards = available.filter(card => card.topicId === item.topicId);
+                        const count = cards.filter(card => learning.records[card.id]).length;
+                        return (
+                          <button key={item.topicId} onClick={() => setFilter(item.topicId)} className={filter === item.topicId ? 'active' : ''} aria-pressed={filter === item.topicId}>
+                            <span className="small-icon"><BookOpen size={18} /></span>
+                            <strong>{topic?.title || item.topicId}</strong>
+                            <small>{topic?.subject} · {count}/{cards.length} cartões praticados</small>
+                            <div className="progress-track" aria-hidden="true"><i style={{ width: `${cards.length ? count / cards.length * 100 : 0}%` }} /></div>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  ) : <p className="muted">Registre um estudo para começar a acompanhar seus assuntos aqui.</p>}
+                </section>
+              </div>
+              <aside>
+                <section className="card register-study" id="register-study" tabIndex={-1}>
+                  <div><h2>Registrar estudo</h2><p className="muted">Adicione um assunto à sua fila após estudar, mesmo fora da Wizdom.</p></div>
+                  <Select aria-label="Assunto estudado" value={topic} onChange={event => setTopic(event.target.value)}>
+                    {topics.map(item => <option key={item.id} value={item.id}>{item.subject} · {item.title}</option>)}
+                  </Select>
+                  <button className="button secondary" onClick={() => { onStudy({ topicId: topic, ...topicById(topic) }, false); setFilter(topic); }}>
+                    Estudei este assunto <Check size={17} />
+                  </button>
+                </section>
+                <section className="card streak-card">
+                  <h2>Atividade na semana</h2>
+                  <StreakWeek stats={stats} />
+                  <p className="muted">Estude, pratique ou complete um minuto de foco para registrar o dia.</p>
+                </section>
+                <section className="card spaced-note">
+                  <Clock3 size={22} />
+                  <h3>Como a revisão é agendada</h3>
+                  <p className="muted">Erros voltam no dia seguinte. Acertos voltam em intervalos crescentes, de 3 a 30 dias.</p>
+                </section>
+              </aside>
+            </div>
+          </>
+        ))}
+      </div>
+      {result && <Celebration result={result} stats={stats} onClose={() => setResult(null)} />}
+    </div>
+  );
 }

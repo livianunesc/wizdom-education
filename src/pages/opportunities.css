@@ -43,23 +43,66 @@
   line-height: 1.65;
 }
 .op-filters {
-  padding: 24px;
-  margin-bottom: 28px;
+  padding: clamp(15px, 2.5vw, 24px);
+  margin-bottom: 22px;
+}
+.op-page-heading {
+  justify-content: flex-start;
+  gap: 1rem;
+}
+.opportunities-page .op-heading-icon {
+  flex: 0 0 auto;
+  width: 56px;
+  height: 56px;
+  border-radius: 17px;
 }
 .op-filter-label {
   display: flex;
   align-items: center;
   gap: 9px;
-  font-size: 13px;
-  margin-bottom: 20px;
+  color: var(--primary);
+  margin-bottom: 14px;
+}
+.op-filter-label h2 {
+  font-size: 1rem;
+  margin: 0;
 }
 .op-filter-grid {
   display: grid;
   grid-template-columns: 1.3fr 1fr 1fr;
-  gap: 20px;
+  gap: 12px;
 }
-.op-filter-grid select {
+.op-filter-grid .field {
+  min-width: 0;
+  margin-bottom: 0;
+}
+.op-search-input {
+  position: relative;
+  display: block;
+}
+.op-search-input svg {
+  position: absolute;
+  left: 11px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--secondary);
+  pointer-events: none;
+}
+.op-filter-grid .op-search-input input {
+  display: block;
   width: 100%;
+  min-height: 45px;
+  padding-inline: 36px 8px;
+  border-color: var(--border);
+  border-radius: 10px;
+  background: var(--surface);
+  color: var(--text);
+}
+.op-filter-grid .wiz-select-trigger {
+  border-color: var(--border);
+  border-radius: 10px;
+  background: var(--surface);
+  color: var(--text);
 }
 .op-result-heading {
   display: flex;
@@ -75,11 +118,11 @@
 }
 .op-count {
   font-size: 11px;
-  background: #eeecf2;
+  background: var(--mint);
   border-radius: 7px;
   padding: 4px 7px;
   font-weight: 600;
-  color: #625b85;
+  color: #155c49;
 }
 .op-data-note {
   font-size: 11px;
@@ -97,33 +140,35 @@
 .op-university-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 20px;
+  gap: 14px;
 }
 .university-card {
-  padding: 25px 23px;
+  padding: 18px;
   display: flex;
   flex-direction: column;
 }
 .university-top {
   display: flex;
   justify-content: space-between;
-  align-items: flex-start;
-  margin-bottom: 21px;
+  align-items: center;
+  margin-bottom: 12px;
 }
 .university-logo {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 69px;
-  height: 58px;
-  border-radius: 13px;
+  min-width: 66px;
+  width: max-content;
+  padding: 0 12px;
+  height: 48px;
+  border-radius: 11px;
   font-size: 14px;
   font-weight: 800;
   letter-spacing: -0.5px;
-  color: #48405e;
+  color: var(--primary);
 }
 .tone-lavender {
-  background: #e6e3f8;
+  background: var(--lavender);
 }
 .tone-mint {
   background: #e3f8ee;
@@ -140,74 +185,68 @@
 .tone-pistachio {
   background: #f4f8e3;
 }
-.save-university {
-  color: #898391 !important;
+.opportunities-page .save-university {
+  width: 44px;
+  height: 44px;
+  color: var(--secondary);
+  border-color: var(--border);
 }
-.save-university.saved {
-  color: #625b85 !important;
-  background: #eeebf6 !important;
+.opportunities-page .save-university.saved {
+  color: var(--primary);
+  background: var(--lavender);
 }
-.university-type {
-  font-size: 10px;
-  color: #666673;
-  display: flex;
-  gap: 7px;
-}
-.university-card h3 {
-  font-size: 16px;
-  line-height: 1.5;
-  margin: 8px 0;
-  min-height: 48px;
-}
+.university-type,
 .university-location {
   display: flex;
   align-items: center;
-  gap: 5px;
-  color: #666673;
-  font-size: 11px;
-  margin: 0 0 23px;
+  gap: 7px;
+  color: var(--secondary);
+  font-size: .85rem;
+}
+.university-type {
+  flex-wrap: wrap;
+}
+.university-type > span:first-child {
+  border-radius: 5px;
+  padding: 3px 7px;
+  background: var(--lavender);
+  color: var(--primary);
+  font-weight: 700;
+}
+.university-card h3 {
+  font-size: 1.18rem;
+  line-height: 1.3;
+  margin: 8px 0 5px;
+}
+.university-location {
+  margin: 0 0 12px;
+}
+.university-location svg {
+  flex: none;
 }
 .university-facts {
-  display: grid;
-  grid-template-columns: 1.5fr 1fr;
-  gap: 10px;
-  margin-top: auto;
+  margin: auto 0 12px;
+  border-radius: 8px;
+  padding: 8px 10px;
+  background: var(--background);
 }
 .university-facts div {
   display: flex;
-  flex-direction: column;
-  gap: 7px;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 9px;
 }
 .university-facts span {
-  font-size: 10px;
-  color: #666673;
+  color: var(--secondary);
+  font-size: .79rem;
 }
 .university-facts strong {
-  font-size: 11px;
-  line-height: 1.6;
-  font-weight: 600;
-}
-.university-facts small {
-  font-size: 9px;
-  font-weight: 400;
-}
-.university-date {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  background: #faf9fc;
-  border-radius: 8px;
-  padding: 11px 9px;
-  margin: 18px 0 16px;
-  font-size: 10px;
-  color: #666673;
-}
-.university-date strong {
-  color: #373743;
+  font-size: .88rem;
+  line-height: 1.4;
 }
 .university-details {
   border: 0;
-  border-top: 1px solid #e8e5ed;
+  border-top: 1px solid var(--border);
   background: none;
   text-align: left;
   text-decoration: none;
@@ -215,10 +254,11 @@
   justify-content: space-between;
   align-items: center;
   gap: 8px;
-  padding: 17px 0 0;
-  color: #625b85;
-  font-size: 11px;
-  font-weight: 600;
+  min-height: 44px;
+  padding: 10px 0 0;
+  color: var(--primary);
+  font-size: .9rem;
+  font-weight: 700;
   cursor: pointer;
 }
 .op-empty {
@@ -757,8 +797,29 @@
   .op-heading-icon {
     display: none;
   }
+  .opportunities-page .op-heading-icon {
+    display: grid;
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+  }
+  .opportunities-page .op-heading-icon svg {
+    width: 23px;
+  }
   .op-filter-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .op-query {
+    grid-column: 1 / -1;
+  }
+  .op-filter-grid .wiz-select-trigger {
+    gap: 4px;
+    padding-inline: 9px;
+    font-size: .9rem;
+  }
+  .op-filter-grid .wiz-select-trigger svg {
+    flex: 0 0 14px;
+    width: 14px;
   }
   .op-university-grid,
   .olympics-grid {
@@ -796,7 +857,7 @@
     min-height: 0;
   }
   .university-card {
-    padding: 23px;
+    padding: 16px;
   }
   .university-facts strong {
     font-size: 12px;

@@ -1,22 +1,28 @@
 import Select from "../Select.jsx";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
+  ArrowDown,
+  ArrowRight,
   BookOpen,
-  Camera,
   Check,
   ChevronRight,
   Coins,
   Edit3,
+  Flame,
   GraduationCap,
   LockKeyhole,
   ShoppingBag,
   Sparkles,
   Target,
   Timer,
-  Trophy,
+  Zap,
   X,
 } from "lucide-react";
+import Character from "../Character.jsx";
+import { dayKey } from "../lib.js";
+import { streakFor } from "../learning.js";
 import "./focus-profile.css";
+import "./profile-studio.css";
 
 const outfits = [
   { id: "lavanda", name: "Lavanda", color: "#b8aedb", price: 0, level: 1 },
@@ -86,27 +92,38 @@ export function WizAvatar({ outfit = "lavanda", size = 128 }) {
     </svg>
   );
 }
-const localDateKey = (date) => new Date(date).toLocaleDateString("en-CA");
 export default function Profile({
   profile = {},
   setProfile,
   stats = {},
   setStats,
   notify,
+  learning,
+  completed = {},
+  navigate,
 }) {
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState(profile);
   const [uploadError, setUploadError] = useState("");
-  const level = Math.floor((stats.xp || 0) / 100) + 1;
+  const editButton = useRef(null);
+  const xp = stats.xp || 0;
+  const level = Math.floor(xp / 100) + 1;
+  const levelProgress = xp % 100;
   const sessions = stats.sessions || [];
-  const rankingPosition =
-    [860, 740, 620, 480, 320].filter((xp) => xp > (stats.xp || 0)).length + 1;
   const totalSeconds = sessions.reduce((sum, item) => sum + item.seconds, 0);
+  const completedBlocks = Object.values(completed).reduce((sum, tasks) => sum + tasks.length, 0);
+  const answers = learning?.answers || [];
+  const correctAnswers = answers.filter((answer) => answer.correct).length;
+  const accuracy = Math.round((100 * correctAnswers) / (answers.length || 1));
+  const streak = streakFor(stats);
+  const targetYear = profile.target?.edition
+    ? `Edição ${profile.target.edition}`
+    : /^\d{4}$/.test(profile.year) ? `Ingresso em ${profile.year}` : profile.year;
   const days = Array.from({ length: 7 }, (_, index) => {
     const date = new Date();
     date.setDate(date.getDate() - 6 + index);
     const seconds = sessions
-      .filter((item) => localDateKey(item.date) === localDateKey(date))
+      .filter((item) => dayKey(new Date(item.date)) === dayKey(date))
       .reduce((sum, item) => sum + item.seconds, 0);
     return {
       label: date
@@ -116,7 +133,19 @@ export default function Profile({
       date: date.toLocaleDateString("pt-BR"),
     };
   });
-  const maxSeconds = Math.max(3600, ...days.map((item) => item.seconds));
+  const maxSeconds = Math.max(60, ...days.map((item) => item.seconds));
+  function closeEditor() {
+    setEditing(false);
+    editButton.current?.focus();
+  }
+  useEffect(() => {
+    if (!editing) return;
+    function handleEscape(event) {
+      if (event.key === "Escape" && !event.defaultPrevented) closeEditor();
+    }
+    document.addEventListener("keydown", handleEscape);
+    return () => document.removeEventListener("keydown", handleEscape);
+  }, [editing]);
   function readImage(event, key) {
     const file = event.target.files?.[0];
     if (!file) return;
@@ -145,8 +174,8 @@ export default function Profile({
       name: draft.name.trim(),
       course: draft.course?.trim() || "Meu próximo passo",
     }));
-    setEditing(false);
-    notify?.("Perfil atualizado. Seu espaço, do seu jeito.");
+    closeEditor();
+    notify?.("Perfil atualizado.");
   }
   function choose(item) {
     if (level < item.level) return;
@@ -172,215 +201,167 @@ export default function Profile({
     notify?.("Um novo visual para acompanhar sua jornada!");
   }
   return (
-    <div className="fp-page">
+    <div className="fp-page profile-studio">
       <div className="page-heading">
         <div>
-          <p className="eyebrow">A SUA JORNADA, DO SEU JEITO</p>
           <h1>Meu perfil</h1>
-          <p className="muted">
-            Muito além de uma nota. Veja tudo o que você está construindo.
-          </p>
+          <p className="muted">Acompanhe seu estudo, sua experiência e sua coleção.</p>
         </div>
         <button
           className="button secondary"
+          ref={editButton}
           onClick={() => {
             setDraft(profile);
+            setUploadError("");
             setEditing(true);
           }}
         >
           <Edit3 size={16} /> Editar perfil
         </button>
       </div>
-      <section className="card student-profile">
-        <div
-          className="profile-banner"
-          style={
-            profile.banner ? { backgroundImage: `url(${profile.banner})` } : {}
-          }
-        >
-          <span>Pequenos passos. Grandes possibilidades.</span>
-          <Sparkles size={42} />
-        </div>
-        <div className="profile-identity">
-          <div className="profile-photo">
-            {profile.photo ? (
-              <img src={profile.photo} alt={`Foto de ${profile.name}`} />
-            ) : (
-              <WizAvatar outfit={stats.outfit} size={100} />
-            )}
-          </div>
+
+      <section className="profile-summary" aria-label="Resumo do estudante">
+        <div className="profile-cover">
+          {profile.banner && <img className="profile-cover-image" src={profile.banner} alt="" />}
           <div className="profile-person">
-            <h2>
-              {profile.name || "Estudante WIZDOM"}{" "}
-              <span className="badge">Nível {level}</span>
-            </h2>
-            <p>
-              <GraduationCap size={16} /> Vestibulando(a) de{" "}
-              {profile.course || "novas possibilidades"}
-            </p>
-            <p className="profile-bio">
-              {profile.bio || "Construindo meu futuro, um dia de cada vez. 🌱"}
-            </p>
+            <span className="badge"><Zap size={14} aria-hidden="true" /> Nível {level}</span>
+            <h2>{profile.name || "Estudante Wizdom"}</h2>
+            {profile.course && <p className="profile-course"><GraduationCap size={17} aria-hidden="true" /> {profile.course}</p>}
+            {profile.bio && <p className="profile-about">{profile.bio}</p>}
+            <a className="profile-collection-link" href="#profile-collection">
+              Ver minha coleção <ArrowDown size={15} aria-hidden="true" />
+            </a>
+          </div>
+          <div className="profile-portrait">
+            <div className="profile-portrait-orbit" aria-hidden="true" />
+            <div className="profile-portrait-art">
+              {profile.photo ? (
+                <img src={profile.photo} alt={`Foto de ${profile.name || "perfil"}`} />
+              ) : (
+                <Character value={profile.character} />
+              )}
+            </div>
+            <Sparkles className="profile-portrait-spark" size={31} aria-hidden="true" />
+            <Zap className="profile-portrait-bolt" size={23} aria-hidden="true" />
           </div>
         </div>
-        <div className="profile-xp">
-          <span>
-            <Sparkles size={15} />
-            {stats.xp || 0} XP conquistados
-          </span>
-          <span>{100 - ((stats.xp || 0) % 100)} XP para o próximo nível</span>
-          <progress value={(stats.xp || 0) % 100} max={100} />
+        <div className="profile-metrics">
+          <div className="profile-metric profile-metric-xp">
+            <span className="profile-metric-icon"><Zap size={18} aria-hidden="true" /></span>
+            <div><span>Experiência</span><strong>{xp} <small>XP</small></strong></div>
+            <progress aria-label="XP no nível atual" value={levelProgress} max={100} />
+            <small>Faltam {100 - levelProgress} XP para o nível {level + 1}</small>
+          </div>
+          <div className="profile-metric profile-metric-streak">
+            <span className="profile-metric-icon"><Flame size={18} aria-hidden="true" /></span>
+            <div><span>Sequência atual</span><strong>{streak} <small>{streak === 1 ? "dia" : "dias"}</small></strong></div>
+          </div>
+          <div className="profile-metric profile-metric-coins">
+            <span className="profile-metric-icon"><Coins size={18} aria-hidden="true" /></span>
+            <div><span>Saldo</span><strong>{stats.coins || 0} <small>moedas</small></strong></div>
+          </div>
         </div>
       </section>
-      <div className="profile-stat-grid">
-        <div className="card">
-          <span className="stat-icon lavender">
-            <Timer size={21} />
-          </span>
-          <strong>
-            {Math.floor(totalSeconds / 3600)}h{" "}
-            {Math.floor((totalSeconds % 3600) / 60)}min
-          </strong>
-          <span>de dedicação</span>
+
+      <section className="profile-progress" aria-labelledby="profile-progress-title">
+        <div className="profile-section-heading">
+          <h2 id="profile-progress-title">Meu progresso</h2>
+          {navigate && <button className="button secondary" onClick={() => navigate("Cronograma")}>Ver cronograma <ArrowRight size={16} aria-hidden="true" /></button>}
         </div>
-        <div className="card">
-          <span className="stat-icon mint">
-            <BookOpen size={21} />
-          </span>
-          <strong>{sessions.length}</strong>
-          <span>sessões concluídas</span>
-        </div>
-        <div className="card">
-          <span className="stat-icon peach">
-            <Coins size={21} />
-          </span>
-          <strong>{stats.coins || 0}</strong>
-          <span>moedinhas disponíveis</span>
-        </div>
-      </div>
-      <div className="profile-content-grid">
-        <section className="card study-chart">
-          <div className="section-heading">
-            <div>
-              <h2>Um pouquinho a cada dia</h2>
-              <p className="muted">Seu tempo de estudo nos últimos 7 dias</p>
-            </div>
-            <Timer size={20} />
-          </div>
-          <div className="study-bars">
-            {days.map((day) => (
-              <div className="study-day" key={day.date}>
-                <span>{Math.floor(day.seconds / 60)}min</span>
-                <div className="study-bar-track">
-                  <div
-                    className="study-bar"
-                    style={{
-                      height: day.seconds
-                        ? `${Math.max(4, (day.seconds / maxSeconds) * 100)}%`
-                        : "3px",
-                    }}
-                    title={`${day.date}: ${Math.floor(day.seconds / 60)} minutos`}
-                  />
+        <div className="profile-progress-grid">
+          <section className="profile-panel">
+            <h3><Timer size={19} aria-hidden="true" /> Tempo de foco</h3>
+            <p className="profile-panel-caption">Últimos 7 dias</p>
+            <div className="profile-chart">
+              {days.map((day) => (
+                <div className="profile-chart-day" key={day.date}>
+                  <span>{Math.floor(day.seconds / 60)} min</span>
+                  <div className="profile-chart-track" title={`${day.date} · ${Math.floor(day.seconds / 60)} min`}>
+                    <i style={{ height: day.seconds ? `${Math.max(4, (day.seconds / maxSeconds) * 100)}%` : "3px" }} />
+                  </div>
+                  <small>{day.label}</small>
                 </div>
-                <small>{day.label}</small>
+              ))}
+            </div>
+            <div className="profile-panel-footer">
+              <span><strong>{Math.floor(totalSeconds / 3600)}h {Math.floor((totalSeconds % 3600) / 60)}min</strong> registrados</span>
+              <span><strong>{sessions.length}</strong> sessões</span>
+            </div>
+          </section>
+          <section className="profile-panel">
+            <h3><BookOpen size={19} aria-hidden="true" /> Questões de revisão</h3>
+            {answers.length ? (
+              <div className="profile-accuracy">
+                <div className="profile-accuracy-ring" aria-label={`${accuracy}% de acertos`} style={{ "--profile-accuracy": `${accuracy}%` }}>
+                  <strong>{accuracy}%</strong><small>de acertos</small>
+                </div>
+                <dl>
+                  <div><dt>Acertos</dt><dd>{correctAnswers}</dd></div>
+                  <div><dt>Erros</dt><dd>{answers.length - correctAnswers}</dd></div>
+                </dl>
               </div>
-            ))}
-          </div>
-          {!sessions.length && (
-            <p className="muted chart-empty">
-              Seu gráfico começa a florescer na primeira sessão de foco.
-            </p>
-          )}
-        </section>
-        <section className="card profile-goal">
-          <span className="stat-icon lavender">
-            <Target size={22} />
-          </span>
-          <h2>O sonho que me move</h2>
-          <h3>{profile.course || "Descobrir meu caminho"}</h3>
-          <p className="muted">
-            {profile.goal || "Construir uma rotina de estudos com mais leveza."}
-          </p>
-          <div>
-            <GraduationCap size={17} />
-            <span>Ingresso em {profile.year || "breve"}</span>
-          </div>
-          <div>
-            <BookOpen size={17} />
-            <span>{profile.school || "Minha jornada de estudos"}</span>
-          </div>
-          <div>
-            <Trophy size={17} />
-            <span>{rankingPosition}º no ranking demonstrativo</span>
-          </div>
-          <small className="muted">Comparação com estudantes fictícios.</small>
-        </section>
-      </div>
-      <section className="card avatar-shop">
+            ) : (
+              <div className="profile-questions-empty">
+                <span><BookOpen size={22} aria-hidden="true" /></span>
+                <p>Seu histórico aparece após a primeira questão respondida.</p>
+              </div>
+            )}
+            <div className="profile-panel-footer">
+              <span><strong>{answers.length}</strong> respostas</span>
+              {navigate && <button className="button secondary" onClick={() => navigate("Revisões")}>Abrir revisões</button>}
+            </div>
+          </section>
+          <section className="profile-panel profile-target-panel">
+            <h3><Target size={19} aria-hidden="true" /> Objetivo de estudo</h3>
+            <div className="profile-target-detail">
+              <strong>{profile.course || "Escolha um curso"}</strong>
+              {targetYear && <p>{targetYear}</p>}
+              {profile.goal && <p>{profile.goal}</p>}
+              <span>{completedBlocks} {completedBlocks === 1 ? "bloco concluído" : "blocos concluídos"}</span>
+            </div>
+            {navigate && <button className="button secondary" onClick={() => navigate("Vestibulares")}>Ver vestibulares <ArrowRight size={16} aria-hidden="true" /></button>}
+          </section>
+        </div>
+      </section>
+
+      <section className="profile-panel avatar-shop" id="profile-collection" aria-labelledby="profile-collection-title">
         <div className="section-heading">
           <div>
-            <p className="eyebrow">SEU COMPANHEIRO DE JORNADA</p>
-            <h2>Um toque de você</h2>
-            <p className="muted">
-              Troque suas moedinhas por um novo visual para sua corujinha.
-            </p>
+            <h2 id="profile-collection-title">Minha coleção</h2>
+            <p className="muted">Use as moedas para resgatar visuais para a sua coruja.</p>
           </div>
           <span className="badge">
-            <Coins size={16} />
+            <Coins size={16} aria-hidden="true" />
             {stats.coins || 0} moedas
           </span>
         </div>
         <div className="shop-layout">
           <div className="shop-preview">
-            <WizAvatar outfit={stats.outfit} size={170} />
-            <strong>Sua corujinha</strong>
-            <span className="muted">Crescendo junto com você</span>
+            <WizAvatar outfit={stats.outfit} size={124} />
+            <strong>Sua coruja</strong>
+            <span className="muted">{outfits.find((item) => item.id === stats.outfit)?.name || "Lavanda"}</span>
           </div>
           <div className="shop-items">
             {outfits.map((item) => {
-              const owned = (stats.owned || ["lavanda"]).includes(item.id),
-                equipped = stats.outfit === item.id,
-                locked = level < item.level;
+              const owned = (stats.owned || ["lavanda"]).includes(item.id);
+              const equipped = (stats.outfit || "lavanda") === item.id;
+              const locked = level < item.level;
               return (
-                <div
-                  className={`shop-item ${equipped ? "equipped" : ""}`}
-                  key={item.id}
-                >
-                  <span
-                    className="outfit-swatch"
-                    style={{ background: item.color }}
-                  />
+                <div className={`shop-item ${equipped ? "equipped" : ""}`} key={item.id}>
+                  <span className="outfit-swatch" style={{ background: item.color }} aria-hidden="true" />
                   <strong>{item.name}</strong>
                   <small>
-                    {locked
-                      ? `Desbloqueia no nível ${item.level}`
-                      : owned
-                        ? "Já é seu"
-                        : `${item.price} moedas`}
+                    {locked ? `Desbloqueia no nível ${item.level}` : owned ? "Já é seu" : `${item.price} moedas`}
                   </small>
                   <button
-                    className={`button ${equipped ? "secondary" : "primary"}`}
-                    disabled={
-                      locked ||
-                      equipped ||
-                      (!owned && (stats.coins || 0) < item.price)
-                    }
+                    className={`button ${equipped || owned ? "secondary" : "primary"}`}
+                    disabled={locked || equipped || (!owned && (stats.coins || 0) < item.price)}
                     onClick={() => choose(item)}
                   >
-                    {locked ? (
-                      <LockKeyhole size={14} />
-                    ) : equipped ? (
-                      <Check size={14} />
-                    ) : !owned ? (
-                      <ShoppingBag size={14} />
-                    ) : null}
-                    {locked
-                      ? "Bloqueado"
-                      : equipped
-                        ? "Em uso"
-                        : owned
-                          ? "Usar"
-                          : "Resgatar"}
+                    {locked && <LockKeyhole size={14} aria-hidden="true" />}
+                    {equipped && <Check size={14} aria-hidden="true" />}
+                    {!locked && !owned && <ShoppingBag size={14} aria-hidden="true" />}
+                    {locked ? "Bloqueado" : equipped ? "Em uso" : owned ? "Usar" : "Resgatar"}
                   </button>
                 </div>
               );
@@ -388,18 +369,8 @@ export default function Profile({
           </div>
         </div>
       </section>
-      <div className="card level-roadmap">
-        <Sparkles size={23} />
-        <div>
-          <h3>Cada nível, uma nova possibilidade</h3>
-          <p className="muted">
-            Nível 1: lavanda e menta · Nível 2: visual pêssego · Nível 3: visual
-            céu. A cada 100 XP, você sobe um nível.
-          </p>
-        </div>
-      </div>
       {editing && (
-        <div className="modal-backdrop" onClick={() => setEditing(false)}>
+        <div className="modal-backdrop" onClick={closeEditor}>
           <form
             className="modal profile-edit-modal"
             role="dialog"
@@ -409,12 +380,12 @@ export default function Profile({
             onClick={(e) => e.stopPropagation()}
           >
             <div className="section-heading">
-              <h2 id="edit-profile-title">Seu perfil, do seu jeito</h2>
+              <h2 id="edit-profile-title">Editar perfil</h2>
               <button
                 className="button secondary icon-button"
                 type="button"
                 aria-label="Fechar edição"
-                onClick={() => setEditing(false)}
+                onClick={closeEditor}
               >
                 <X size={18} />
               </button>
@@ -507,7 +478,7 @@ export default function Profile({
               <button
                 className="button secondary"
                 type="button"
-                onClick={() => setEditing(false)}
+                onClick={closeEditor}
               >
                 Cancelar
               </button>

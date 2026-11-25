@@ -1,36 +1,12 @@
-import Character, { CharacterEditor } from "./Character.jsx";
+import { CharacterEditor } from "./Character.jsx";
 import Shop from "./pages/Shop.jsx";
 import Duo from "./pages/Duo.jsx";
 import { credit, weekKey } from "./rewards.js";
-import { useState, useEffect, useRef } from "react";
-import {
-  ArrowLeft,
-  FileText,
-  LayoutDashboard,
-  CalendarDays,
-  BookOpen,
-  Timer,
-  GraduationCap,
-  Trophy,
-  UserRound,
-  LogOut,
-  ArrowUpRight,
-  ArrowRight,
-  Bell,
-  Search,
-  Menu,
-  X,
-  Sprout,
-  Coins,
-  ChevronDown,
-  Settings,
-  Check,
-  RotateCcw,
-  Plus,
-  Heart,
-  Mail,
-  ShieldCheck,
-} from "lucide-react";
+import { useState, useEffect } from "react";
+import { ArrowRight, Settings, Check, X, ShieldCheck } from "lucide-react";
+import StudioHeader from "./StudioHeader.jsx";
+import LearningHub from "./pages/LearningHub.jsx";
+import Resources from "./pages/Resources.jsx";
 import Dashboard from "./Dashboard.jsx";
 import Schedule from "./pages/Schedule.jsx";
 import Reviews from "./pages/Reviews.jsx";
@@ -53,22 +29,8 @@ import {
   passwordHash,
   makePlan,
   dayKey,
-  weekdays,
 } from "./lib.js";
 const subjectsForOlympics = { Física: "Física", Ciências: "Física", História: "História", Geografia: "Geografia", Química: "Química" };
-const navigation = [
-  ["Meu espaço", LayoutDashboard],
-  ["Cronograma", CalendarDays],
-  ["Área de foco", Timer],
-  ["Revisões", BookOpen],
-  ["Provas anteriores", FileText],
-  ["Vestibulares", GraduationCap],
-  ["Calendário", CalendarDays],
-  ["Olimpíadas", Sprout],
-  ["Ranking", Trophy],
-  ["Meu perfil", UserRound],
-  ["Loja", Coins],
-];
 export default function App() {
   useDialogFocus();
   const [store, renderStore] = useState(safeLoad);
@@ -77,21 +39,6 @@ export default function App() {
   const [focusTask, setFocusTask] = useState(null);
   const [auth, setAuth] = useState(null);
   const [toast, setToast] = useState("");
-  const [mobile, setMobile] = useState(false);
-  const menuButton = useRef(null);
-  const closeMenuButton = useRef(null);
-  function closeMenu() {
-    setMobile(false);
-    menuButton.current?.focus();
-  }
-  useEffect(() => {
-    if (!mobile) return;
-    closeMenuButton.current?.focus();
-    const escape = event => { if (event.key === "Escape") closeMenu(); };
-    document.addEventListener("keydown", escape);
-    return () => document.removeEventListener("keydown", escape);
-  }, [mobile]);
-  const [search, setSearch] = useState("");
   const [settings, setSettings] = useState(false);
   const [large, setLarge] = useState(false);
   const [contrast, setContrast] = useState(false);
@@ -129,16 +76,6 @@ export default function App() {
   useEffect(() => {
     document.title = `${page} · WIZDOM`;
   }, [page]);
-  useEffect(() => {
-    const shortcut = (e) => {
-      if ((e.metaKey || e.ctrlKey) && e.key === "k") {
-        e.preventDefault();
-        document.querySelector(".search-wrap input")?.focus();
-      }
-    };
-    document.addEventListener("keydown", shortcut);
-    return () => document.removeEventListener("keydown", shortcut);
-  }, []);
   function notify(s) {
     setToast(s);
   }
@@ -169,18 +106,19 @@ export default function App() {
     window.addEventListener('focus', grant);
     return () => { clearInterval(timer); window.removeEventListener('focus', grant); };
   }, [account?.id]);
-  function navigate(p, task = null) {
+  function navigate(nextPage, task = null) {
+    if (nextPage !== page) setHistory(items => [...items, { page, task: focusTask }]);
     setFocusTask(task);
-    if (p !== page) setHistory(h => [...h, page]);
-    setPage(p);
-    setMobile(false);
-    setSearch("");
+    setPage(nextPage);
     window.scrollTo(0, 0);
   }
   function goBack() {
-    setHistory(h => h.slice(0,-1));
-    setPage(history.at(-1) || "Meu espaço");
-    setMobile(false); setSearch(""); window.scrollTo(0,0);
+    const previous = history.at(-1);
+    if (!previous) return;
+    setHistory(items => items.slice(0, -1));
+    setPage(previous.page);
+    setFocusTask(previous.task);
+    window.scrollTo(0, 0);
   }
   function logout() {
     setStore(s=>({...s,current:null}));
@@ -208,8 +146,8 @@ export default function App() {
       const day = dayKey();
       if (account) update("stats", stats => credit(stats, { id: 'block:' + day, label: 'Missão diária · concluir um bloco', day, xp: 10, coins: 2 }));
     }
-    notify("Assunto estudado! Três flashcards estão disponíveis nas revisões.");
-    if(openReviews) navigate("Revisões");
+    notify("Assunto estudado. Três questões estão disponíveis para revisão.");
+    if (openReviews) navigate("Revisões");
   }
   async function submitAuth({ name, email, password }) {
     email = email.trim().toLowerCase();
@@ -245,9 +183,6 @@ export default function App() {
     setStats: (v) => update("stats", v),
     notify,
   };
-  const searchResults = navigation.filter(([name]) =>
-    name.toLowerCase().includes(search.toLowerCase()),
-  );
   if (auth)
     return (
       <>
@@ -275,168 +210,17 @@ export default function App() {
   return (
     <div
       data-theme={student.stats.theme || "caderno"}
-      className={`app ${large ? "large-type" : ""} ${contrast ? "high-contrast" : ""}`}
+      className={`app studio-shell ${large ? "large-type" : ""} ${contrast ? "high-contrast" : ""}`}
     >
       <a className="skip-link" href="#main-content">
         Ir para o conteúdo
       </a>
-      {mobile && (
-        <div className="mobile-shade" onClick={closeMenu} />
-      )}
-      <aside className={`sidebar ${mobile ? "open" : ""}`}>
-        <a
-          href="#"
-          className="brand"
-          onClick={(e) => {
-            e.preventDefault();
-            navigate("Meu espaço");
-          }}
-        >
-          <span className="brand-symbol">w</span>wizdom
-          <span className="brand-period">.</span>
-        </a>
-        <span className="sidebar-caption">SEU FUTURO, NO SEU RITMO</span>
-        <button
-          className="mobile-close icon-button"
-          aria-label="Fechar menu"
-          ref={closeMenuButton}
-          onClick={closeMenu}
-        >
-          <X />
-        </button>
-        <div className="nav-group-label">SEU DIA A DIA</div>
-        <nav aria-label="Navegação principal">
-          {navigation.map(([name, Icon], i) => (
-            <div key={name}>
-              {i === 4 && <div className="nav-group-label">NOVOS CAMINHOS</div>}
-              <button
-                className={`nav-item ${page === name ? "active" : ""}`}
-                aria-current={page === name ? "page" : undefined}
-                onClick={() => navigate(name)}
-              >
-                <Icon size={19} strokeWidth={1.65} />
-                {name}
-                {name === "Área de foco" && <span className="nav-dot" />}
-              </button>
-            </div>
-          ))}
-        </nav>
-        <div className="sidebar-bottom">
-          <div className="sidebar-encouragement">
-            <span>✧</span>
-            <p>
-              O importante é continuar.
-              <br />
-              <strong>Mesmo que devagar.</strong>
-            </p>
-          </div>
-          {demo ? (
-            <button className="demo-account" onClick={() => setAuth("signup")}>
-              <span className="user-avatar">{profile.name[0]}</span>
-              <div>
-                <strong>Explorando a WIZDOM</strong>
-                <small>
-                  Criar minha conta <ArrowUpRight size={12} />
-                </small>
-              </div>
-            </button>
-          ) : (
-            <button
-              className="demo-account"
-              onClick={logout}
-            >
-              <span className="user-avatar">{profile.name[0]}</span>
-              <div>
-                <strong>{profile.name}</strong>
-                <small>
-                  Sair da conta <LogOut size={12} />
-                </small>
-              </div>
-            </button>
-          )}
-        </div>
-      </aside>
+      <StudioHeader page={page} navigate={navigate} canGoBack={history.length > 0} goBack={goBack}
+        profile={profile} demo={demo} coins={student.stats.coins}
+        onLogin={() => setAuth("login")} onSignup={() => setAuth("signup")} onLogout={logout} />
       <div className="app-content">
-        <header className="topbar">
-          <div className="topbar-left">
-            <button
-              className="icon-button hamburger"
-              aria-label="Abrir menu"
-              ref={menuButton}
-              aria-expanded={mobile}
-              onClick={() => setMobile(true)}
-            >
-              <Menu />
-            </button>
-            <button className="icon-button back-button" aria-label="Voltar" disabled={!history.length} onClick={goBack}><ArrowLeft size={18}/></button>
-            <span className="breadcrumb">
-              Seu cantinho <span>/</span> <strong>{page}</strong>
-            </span>
-          </div>
-          <div className="topbar-actions">
-            {demo ? <button className="button secondary top-login" onClick={()=>setAuth("login")}>Entrar</button> : <button className="icon-button" aria-label="Sair da conta" onClick={logout}><LogOut size={18}/></button>}
-            <div className="search-wrap">
-              <Search size={16} />
-              <input
-                aria-label="Buscar na WIZDOM"
-                placeholder="O que vamos explorar?"
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-              />
-              <kbd>⌘ K</kbd>
-              {search && (
-                <div className="search-results">
-                  {searchResults.length ? (
-                    searchResults.map(([name, Icon]) => (
-                      <button key={name} onClick={() => navigate(name)}>
-                        <Icon size={17} />
-                        {name}
-                        <ArrowUpRight size={14} />
-                      </button>
-                    ))
-                  ) : (
-                    <p>Nenhuma página encontrada.</p>
-                  )}
-                </div>
-              )}
-            </div>
-            <button
-              className="coin-pill"
-              onClick={() => navigate("Loja")}
-              title="Suas moedas"
-              aria-label={student.stats.coins + " moedas, abrir loja"}
-            >
-              <Coins size={16} />
-              {student.stats.coins}
-            </button>
-            <button
-              className="icon-button notification-button"
-              aria-label="Ver lembretes"
-              onClick={() => {
-                navigate("Calendário");
-                notify(
-                  "Suas inscrições favoritas e seus dias de estudo ficam no calendário.",
-                );
-              }}
-            >
-              <Bell size={19} />
-              <i />
-            </button>
-            <button
-              className="top-avatar"
-              onClick={() => (demo ? setAuth("login") : navigate("Meu perfil"))}
-              aria-label={demo ? "Entrar na conta" : "Abrir perfil"}
-            >
-              {profile.photo ? (
-                <img src={profile.photo} alt="" />
-              ) : (
-                profile.name[0]
-              )}
-            </button>
-          </div>
-        </header>
         <main id="main-content" className="main-content">
-          <div className="demo-notice" hidden={!demo}>
+          <div className="demo-notice" hidden={!demo || page !== "Meu espaço"}>
             <span>
               <span className="tiny-dot" /> Você está no modo demonstração.
             </span>
@@ -444,7 +228,20 @@ export default function App() {
               Criar minha conta <ArrowRight size={13} />
             </button>
           </div>
-          {page !== "Meu espaço" && <Character value={profile.character} className="notebook-vignette" scene={{ "Provas anteriores": "exams", "Área de foco": "focus", "Cronograma": "agenda", "Calendário": "agenda", "Revisões": "review" }[page]} />}
+          {(page === "Ciclos" || page === "Disciplinas") && (
+            <LearningHub
+              key={page + (focusTask?.subject || "")}
+              mode={page === "Ciclos" ? "cycles" : "subjects"}
+              initialSubject={focusTask?.subject}
+              learning={student.learning}
+              onPractice={(topic, level) => navigate("Revisões", { topicId: topic.id, level })}
+            />
+          )}
+          {(page === "Materiais" || page === "Ferramentas") && <Resources
+            key={page}
+            mode={page === "Materiais" ? "materials" : "tools"}
+            navigate={navigate}
+          />}
           {page === "Loja" && <Shop {...shared} />}
           {page === "Meu espaço" && (
             <Dashboard
@@ -454,6 +251,8 @@ export default function App() {
               checkins={student.checkins}
               setCheckins={(v) => update("checkins", v)}
               completed={student.completed}
+              scheduled={student.scheduled}
+              demo={demo}
               setCompleted={(v) => update("completed", v)}
               favorites={student.favorites}
               navigate={navigate}
@@ -521,13 +320,16 @@ export default function App() {
           {page === "Ranking" && <Ranking {...shared} />}
           {page === "Meu perfil" && (
             <>
-              <Profile {...shared} setProfile={(v) => update("profile", v)} />
-              <section className="card notebook-panel"><h2>Meu objetivo</h2><p>{profile.target ? `${profile.course} · edição ${profile.target.edition}` : "Escolha uma instituição, curso e processo."}</p><button className="button secondary" onClick={() => navigate("Vestibulares")}>Escolher objetivo</button></section>
+              <Profile {...shared} learning={student.learning} completed={student.completed} navigate={navigate} setProfile={(v) => update("profile", v)} />
               <CharacterEditor profile={profile} setProfile={value => update("profile", value)} />
             </>
           )}
           {page === "Revisões" && (
             <Reviews
+              key={[focusTask?.mode, focusTask?.topicId, focusTask?.level].join(":")}
+              initialMode={focusTask?.mode}
+              initialTopic={focusTask?.topicId}
+              initialLevel={focusTask?.level}
               profile={profile}
               learning={student.learning}
               setLearning={(v) => update("learning", v)}
@@ -540,7 +342,7 @@ export default function App() {
           )}
           <footer className="app-footer">
             <span>
-              wizdom. <span>Feito para respeitar seu ritmo.</span>
+              Wizdom Educação
             </span>
             <button onClick={() => setSettings(true)}>
               <Settings size={13} /> Conforto e privacidade

@@ -3,15 +3,12 @@ import { useEffect, useState } from "react";
 import {
   ArrowRight,
   Bookmark,
-  CalendarDays,
   ExternalLink,
   GraduationCap,
   MapPin,
   Search,
   SlidersHorizontal,
-  Sparkles,
   X,
-  Info,
 } from "lucide-react";
 import { universities, processes } from "../admissions.js";
 import TargetPlan from "./TargetPlan.jsx";
@@ -63,43 +60,39 @@ export default function Opportunities({
   }
   return (
     <div className="opportunities-page">
-      <div className="page-heading">
+      <header className="page-heading op-page-heading">
+        <span className="op-heading-icon"><GraduationCap size={30} aria-hidden="true" /></span>
         <div>
-          <span className="eyebrow">SEU PRÓXIMO CAPÍTULO</span>
           <h1>Vestibulares</h1>
-          <p className="muted">
-            Encontre a universidade que combina com o seu sonho.
-          </p>
+          <p className="muted">Encontre cursos, consulte as formas de ingresso e escolha seu objetivo de estudo.</p>
         </div>
-        <span className="op-heading-icon">
-          <GraduationCap size={30} />
-        </span>
-      </div>
-      <div className="op-discover-banner">
-        <div className="op-banner-symbol">
-          <Sparkles size={25} />
-        </div>
-        <div>
-          <h3>Seu futuro começa com uma descoberta</h3>
-          <p>
-            Explore com calma. Salve suas opções e escolha um objetivo para o cronograma.
-          </p>
-        </div>
-      </div>
-      <section
-        className="card op-filters"
-        aria-label="Filtros de universidades"
-      >
+      </header>
+      <section className="card op-filters" aria-label="Filtros de universidades">
         <div className="op-filter-label">
-          <SlidersHorizontal size={17} />
-          <strong>O que você está procurando?</strong>
-        </div>
-        <div className="notebook-grid notebook-panel">
-          <label>Pesquisar instituição ou curso<input value={query} onChange={e => setQuery(e.target.value)} /></label>
-          <label>UF<select value={uf} onChange={e => setUf(e.target.value)}><option value="">Todos os estados</option>{[...new Set(universities.map(item => item.uf))].sort().map(item => <option key={item}>{item}</option>)}</select></label>
-          <label>Ingresso<select value={entry} onChange={e => setEntry(e.target.value)}><option value="">Todos os processos</option>{[...new Set(universities.map(item => item.entry))].sort().map(item => <option key={item}>{item}</option>)}</select></label>
+          <SlidersHorizontal size={17} aria-hidden="true" />
+          <h2>Filtrar cursos e instituições</h2>
         </div>
         <div className="op-filter-grid">
+          <label className="field op-query">
+            Pesquisar instituição ou curso
+            <span className="op-search-input"><Search size={17} aria-hidden="true" />
+              <input type="search" placeholder="Ex.: Unicamp" value={query} onChange={event => setQuery(event.target.value)} />
+            </span>
+          </label>
+          <label className="field">
+            UF
+            <Select value={uf} onChange={event => setUf(event.target.value)}>
+              <option value="">Todas as UFs</option>
+              {[...new Set(universities.map(item => item.uf))].sort().map(item => <option key={item}>{item}</option>)}
+            </Select>
+          </label>
+          <label className="field">
+            Ingresso
+            <Select value={entry} onChange={event => setEntry(event.target.value)}>
+              <option value="">Todos</option>
+              {[...new Set(universities.map(item => item.entry))].sort().map(item => <option key={item}>{item}</option>)}
+            </Select>
+          </label>
           <label className="field">
             Curso
             <Select value={course} onChange={(e) => setCourse(e.target.value)}>
@@ -112,7 +105,7 @@ export default function Opportunities({
           <label className="field">
             Instituição
             <Select value={type} onChange={(e) => setType(e.target.value)}>
-              <option value="">Públicas e particulares</option>
+              <option value="">Todos os tipos</option>
               <option>Pública</option>
               <option>Particular</option>
             </Select>
@@ -132,11 +125,12 @@ export default function Opportunities({
       </section>
       <div className="section-heading op-result-heading">
         <h2>
-          {saved ? "Suas favoritas" : "Universidades para conhecer"}{" "}
+          {saved ? "Suas favoritas" : "Ofertas disponíveis"}{" "}
           <span className="op-count">{filtered.length}</span>
         </h2>
         <button
           className={`button secondary ${saved ? "is-active" : ""}`}
+          aria-pressed={saved}
           onClick={() => setSaved(!saved)}
         >
           <Bookmark size={16} fill={saved ? "currentColor" : "none"} />{" "}
@@ -162,12 +156,13 @@ export default function Opportunities({
                 />
               </button>
             </div>
-            <span className="university-type">
-              {u.type} <span>·</span> {u.course}
-            </span>
+            <div className="university-type">
+              <span>{u.course}</span>
+              <span>{u.type}</span>
+            </div>
             <h3>{u.name}</h3>
             <p className="university-location">
-              <MapPin size={14} /> {u.city}
+              <MapPin size={15} aria-hidden="true" /> {u.city} · Campus {u.campus}
             </p>
             <div className="university-facts">
               <div>
@@ -175,7 +170,6 @@ export default function Opportunities({
                 <strong>{u.entry}</strong>
               </div>
             </div>
-            <p className="university-date">Campus {u.campus}</p>
             <button className="university-details" onClick={() => setDetail(u)}>
               Conhecer universidade <ArrowRight size={17} />
             </button>
@@ -185,11 +179,8 @@ export default function Opportunities({
       {!filtered.length && (
         <div className="card empty-state op-empty">
           <Search size={34} />
-          <h3>Ainda não encontramos essa combinação.</h3>
-          <p>
-            Tente outra região ou explore outros cursos. Há muitos caminhos
-            possíveis.
-          </p>
+          <h3>Nenhuma oferta encontrada</h3>
+          <p>Ajuste a busca ou selecione outros filtros.</p>
           <button
             className="button secondary"
             onClick={() => {

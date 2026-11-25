@@ -5,13 +5,12 @@ import {
   Eye,
   EyeOff,
   LockKeyhole,
-  Sparkles,
+  Compass,
   ArrowUpRight,
-  Check,
-  Flame,
   GraduationCap,
 } from "lucide-react";
 import Character from "./Character.jsx";
+import compassBooks from "./assets/compass-books.webp";
 import "./auth.css";
 
 export default function Auth({ mode, setMode, onSubmit, onClose, onDemo }) {
@@ -58,38 +57,17 @@ export default function Auth({ mode, setMode, onSubmit, onClose, onDemo }) {
           onClick={onClose}
           aria-label="WIZDOM, voltar à demonstração"
         >
-          wizdom<span>.</span>
+          <span className="studio-mark" aria-hidden="true"><Compass size={23} /></span> wizdom<span>.</span>
         </button>
         <div className="auth-story-content">
-          <span className="auth-kicker">
-            <Sparkles size={15} /> Um espaço para você crescer
-          </span>
-          <h1>
-            Seu futuro.
-            <br />
-            No seu ritmo.
-          </h1>
-          <p>
-            Entre um sonho e uma conquista,
-            <br />
-            existe um passo de cada vez.
-          </p>
           <div className="auth-illustration-scene">
             <span className="auth-orbit orbit-one" aria-hidden="true" />
             <span className="auth-orbit orbit-two" aria-hidden="true" />
-            <div className="auth-float-card auth-streak-card"><span><Flame size={21} /></span><div><strong>Um dia de cada vez</strong><small>Sua próxima conquista começa aqui</small></div></div>
-            <Character />
-            <div className="auth-float-card auth-plan-card"><span><Check size={17} /></span><div><strong>Um plano com a sua cara</strong><small>Tempo para estudar. Espaço para viver.</small></div></div>
-            <span className="auth-spark spark-one" aria-hidden="true">✦</span><span className="auth-spark spark-two" aria-hidden="true">✧</span>
+            <img src={compassBooks} width="630" height="630" alt="" />
           </div>
-          <div className="auth-story-note">
-            Você não precisa ter tudo resolvido.
-            <br />A gente começa com o que é possível hoje.
-          </div>
+          <h1>Seu próximo passo começa aqui.</h1>
+          <p>Planeje a semana, pratique por assunto e acompanhe sua evolução para o vestibular.</p>
         </div>
-        <span className="auth-footer">
-          Mais leveza na sua jornada até a faculdade.
-        </span>
       </section>
       <section className="auth-form-section">
         <button className="auth-back" onClick={onClose}>
@@ -97,14 +75,12 @@ export default function Auth({ mode, setMode, onSubmit, onClose, onDemo }) {
         </button>
         <div className="auth-form-content">
           <span className="auth-welcome-icon"><GraduationCap size={26} /></span>
-          <span className="eyebrow">SUA JORNADA COMEÇA AQUI</span>
-          <Character className="auth-mobile-character notebook-vignette" /><h2>
-            {signup ? "Um novo começo, juntos." : "Que bom ter você de volta."}
-          </h2>
+          <Character className="auth-mobile-character notebook-vignette" />
+          <h2>{signup ? "Crie sua conta" : "Entre na Wizdom"}</h2>
           <p className="muted">
             {signup
-              ? "Crie seu espaço e descubra um jeito de estudar que combina com você."
-              : "Entre no seu espaço. Seu próximo passo está esperando por você."}
+              ? "Monte seu cronograma e salve seu progresso."
+              : "Acesse seu cronograma, suas questões e seu progresso."}
           </p>
           <div className="auth-tabs" aria-label="Acesso">
             <button

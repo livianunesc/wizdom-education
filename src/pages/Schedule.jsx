@@ -36,14 +36,19 @@ export default function Schedule({ profile, mood, navigate, onEdit, onStudy, com
   const studied = completed[dayKey(date)] || [];
   const future = dayKey(date) > dayKey(now);
   return <div className="schedule-page">
-    <div className="page-heading">
-      <div><span className="eyebrow">UM CAMINHO QUE É SEU</span><h1>Meu cronograma</h1><p className="muted">Seu cronograma para {profile.course}, com assuntos, prática e tempo para respirar.</p></div>
-      <button className="button secondary" onClick={onEdit}>Ajustar minha rotina <Target size={16}/></button>
-    </div>
+    <header className="page-heading schedule-heading">
+      <span className="schedule-heading-icon"><CalendarDays size={29} aria-hidden="true"/></span>
+      <div className="schedule-heading-copy"><h1>Meu cronograma</h1><p className="muted">Organize seus blocos de estudo para {profile.course}.</p></div>
+      <button className="button secondary" onClick={onEdit}>Ajustar minha rotina <Target size={16} aria-hidden="true"/></button>
+    </header>
     <section className="plan-personalized">
-      <div className="plan-personalized-icon"><Sparkles size={26}/></div>
-      <div><span className="eyebrow">FEITO A PARTIR DAS SUAS RESPOSTAS</span><h2>{info.phase}</h2>{profile.target && <p>Edição pretendida {profile.target.edition}{profile.target.date && ` · Data pessoal: ${profile.target.date}`}</p>}<p>{profile.days?.length || 0} dias por semana · {info.minutes} min por dia com pausas · {profile.routine || 'Horários flexíveis'}</p></div>
-      <div className="plan-week-total"><strong>{Math.floor(weekMinutes / 60)}h {weekMinutes % 60}min</strong><span>planejados nesta semana</span></div>
+      <div className="plan-personalized-icon"><Target size={24} aria-hidden="true"/></div>
+      <div className="plan-personalized-copy">
+        <h2>{info.phase}</h2>
+        {profile.target && <p>Edição pretendida {profile.target.edition}{profile.target.date && ` · Data pessoal: ${profile.target.date}`}</p>}
+        <p>{profile.days?.length || 0} dias por semana · {info.minutes} min por dia com pausas · {profile.routine || 'Horários flexíveis'}</p>
+      </div>
+      <div className="plan-week-total"><strong>{Math.floor(weekMinutes / 60)}h {weekMinutes % 60}min</strong><span>Planejados nesta semana</span></div>
     </section>
     <details className="plan-rationale"><summary>Como seu formulário virou este plano?</summary><ul>{info.explanation.map((line) => <li key={line}>{line}</li>)}</ul><p>Horários são sugestões editáveis pela sua rotina. O plano é uma trilha inicial de fundamentos: não promete aprovação nem substitui um curso completo.</p></details>
     {message && <p role="status">{message}</p>}
@@ -63,15 +68,15 @@ export default function Schedule({ profile, mood, navigate, onEdit, onStudy, com
         {weekPlans[i].length ? <><small>{weekPlans[i].reduce((s, t) => s + t.minutes + t.breakAfter, 0)} min</small><span className="plan-day-dots">{[...new Set(weekPlans[i].map((t) => t.subject))].slice(0, 4).map((subject, j) => <i key={subject} className={['lavender', 'mint', 'peach', 'blue'][j]} title={subject}/>)}</span></> : <><small>Descanso</small><Leaf size={15}/></>}
       </button>)}</div>
     </section>
-    <div className="section-heading plan-date-title"><div><span className="eyebrow">{dayKey(date) === dayKey(now) ? 'HOJE É UM BOM DIA PARA COMEÇAR' : 'UM PASSO DE CADA VEZ'}</span><h2>{date.toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long' })}</h2></div><span className="badge"><CalendarDays size={14}/>{tasks.length} blocos</span></div>
-    {tasks.length ? <div className="plan-task-list">{tasks.map((task, i) => <div key={task.id}>
+    <div className="section-heading plan-date-title"><div><h2>{date.toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long' })}</h2></div><span className="badge"><CalendarDays size={14}/>{tasks.length} blocos</span></div>
+    {tasks.length ? <div className="plan-task-list">{tasks.map(task => <div key={task.id}>
       <article className={`card plan-task ${studied.includes(task.id) ? 'is-complete' : ''}`}>
         <div className="plan-task-time"><span>{task.start}</span><i/><span>{task.end}</span></div>
         <div className="plan-task-body"><div className="plan-task-meta"><span className={`badge ${task.tone}`}>{task.subject}</span><span><Clock3 size={13}/>{task.minutes} min · {task.kind}</span>{studied.includes(task.id) && <span className="plan-completed-label"><Check size={14}/>Estudado</span>}</div><h3>{task.title}</h3><p>{task.description}</p><div className="plan-activity"><strong>Na prática</strong><p>{task.activity}</p></div></div>
         <div className="plan-task-actions">{task.source && <a className="button secondary" href={task.source} target="_blank" rel="noreferrer">Consultar prova oficial</a>}{task.library && <button className="button secondary" onClick={() => navigate('Provas anteriores')}>Abrir acervo do INEP</button>}{!studied.includes(task.id) && <button className="button secondary" onClick={() => { setEditing(task); setMessage(''); window.scrollTo(0, 0); }}>Editar ou mover</button>}<button className="button primary" onClick={() => navigate('Área de foco', task)}><Play size={15}/>Começar foco</button>{onStudy && <button className="button secondary" disabled={future || studied.includes(task.id)} title={future ? 'Registre o estudo no dia em que ele acontecer.' : undefined} onClick={() => onStudy(task)}><Check size={15}/>{studied.includes(task.id) ? 'Revisão liberada' : 'Já estudei'}</button>}</div>
       </article>
       {task.breakAfter > 0 && <div className="plan-break"><Coffee size={14}/>{task.breakAfter} min de pausa · água, alongamento e um respiro</div>}
-    </div>)}</div> : <section className="card plan-rest"><Leaf size={40}/><h2>Hoje também cabe descansar.</h2><p>Você não escolheu este dia no formulário. Sua próxima sessão está nos dias marcados acima.</p><button className="button secondary" onClick={onEdit}>Mudar dias de estudo</button></section>}
+    </div>)}</div> : <section className="card plan-rest"><Leaf size={33} aria-hidden="true"/><h2>Dia sem blocos de estudo</h2><p>Selecione outro dia da semana para ver os blocos programados.</p><button className="button secondary" onClick={onEdit}>Mudar dias de estudo</button></section>}
     <div className="soft-info"><Sparkles size={20}/><p>Ao marcar um assunto como estudado, você libera flashcards dele em Revisões. Acertos e erros ajudam a organizar a próxima revisão.</p></div>
   </div>;
 }

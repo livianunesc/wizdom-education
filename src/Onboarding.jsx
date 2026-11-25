@@ -6,7 +6,6 @@ import {
   ArrowLeft,
   ArrowRight,
   Check,
-  Heart,
   Sparkles,
   CalendarDays,
   GraduationCap,
@@ -102,17 +101,9 @@ export default function Onboarding({ name, initial, onComplete, onExit }) {
       </header>
       <div className="onboard-wrap">
         <aside className="onboard-aside">
-          <span className="auth-kicker">
-            <Heart size={15} /> Feito para o seu momento
-          </span>
-          <Character className="notebook-vignette" /><h1>
-            Não existe
-            <br />
-            um único jeito
-            <br />
-            de chegar lá.
-          </h1>
-          <p>Vamos encontrar o seu.</p>
+          <Character className="notebook-vignette" />
+          <h1>Monte seu plano de estudos</h1>
+          <p>Defina seu objetivo, suas prioridades e o tempo que tem para estudar.</p>
           <div className="onboard-steps">
             {[
               "Seu próximo capítulo",
@@ -128,10 +119,6 @@ export default function Onboarding({ name, initial, onComplete, onExit }) {
               </div>
             ))}
           </div>
-          <p className="onboard-small">
-            Suas respostas servem para personalizar o plano, não para definir
-            quem você é.
-          </p>
         </aside>
         <section className="onboard-card card">
           <div

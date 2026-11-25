@@ -1,6 +1,6 @@
 # WIZDOM
 
-Seu futuro, no seu ritmo. Plataforma de estudos com interface pastel, cronogramas personalizados, foco, biblioteca ENEM e revisões com flashcards.
+Plataforma de estudos para vestibulares com trilhas por disciplina, cronograma, sessões de foco, acervo ENEM e prática com questões e flashcards.
 
 ## Abrir com dois cliques
 
@@ -14,6 +14,9 @@ Os dados ficam neste navegador. Mover o arquivo ou trocar de navegador pode cria
 
 ## O que experimentar
 
+- **Início e navegação:** acesse os conteúdos pelo topo e use o menu para abrir cronograma, calendário, área de foco, olimpíadas, ranking, perfil e loja.
+- **Ciclos e Disciplinas:** pratique as questões existentes por matéria, assunto ou dificuldade. As respostas contabilizam o avanço nas duas telas.
+- **Questões e Materiais:** escolha entre prática por tema, fila de revisão e flashcards. Busque provas e gabaritos do ENEM por ano ou encontre questões por disciplina.
 - **Login e cadastro locais:** botão Entrar, criação de conta, senha com visibilidade opcional, sair e voltar. Senhas de teste são derivadas com PBKDF2/SHA-256 e salt individual. Não há servidor de autenticação, recuperação de senha nem envio de e-mails; use dados fictícios e uma senha de teste.
 - **Duas demonstrações:** Júlia, para Medicina; Leo, para Engenharia. Cada demonstração e cada conta têm progresso separado.
 - **Seletores estilizados:** opções no padrão da plataforma, clique, setas, Home/End, digitação e Escape. Sem o menu cinza nativo.
@@ -86,7 +89,7 @@ Esta versão foi importada do ZIP original e ampliada neste repositório.
 ## Experimentar o foco em dupla
 
 1. Na raiz, execute `npm ci` e `npm run dev`. Os dois dispositivos precisam abrir a **mesma origem**, com `/api/duo` no mesmo servidor. Para testar em dispositivos físicos, coloque um proxy HTTPS na frente dessa origem. Web Crypto do cadastro local exige HTTPS, exceto em localhost.
-2. Abra em dois dispositivos ou em dois perfis de navegador separados. Em cada um, crie uma conta **local de teste**, conclua o onboarding e abra **Área de foco → Estudar com um amigo**.
+2. Abra em dois dispositivos ou em dois perfis de navegador separados. Em cada um, crie uma conta **local de teste**, conclua o onboarding e abra **Ferramentas → Área de foco → Estudar com um amigo**.
 3. Em um, escolha **1 minuto** e crie a sala. Copie o link de convite ou passe o código ao outro dispositivo. O segundo entra e os dois confirmam prontidão.
 4. Experimente pausar e confirmar de novo nos dois dispositivos. Para testar a reconexão, deixe um deles offline por mais de oito segundos, volte à mesma origem, recarregue e confirme em ambos.
 5. Depois que ambos atingirem o fim da sessão, resgate **4 XP + 1 XP de bônus** por minuto, mais 2 moedas por minuto. O primeiro resgate na semana também completa a missão semanal. Recarregar e reenviar o resgate preserva o saldo.
@@ -103,4 +106,7 @@ As oito olimpíadas têm roteiro inicial e portal da organizadora. A confirmaç�
 
 ## Capturas
 
-[Início anterior em 1440 px](docs/redesign/antes-desktop.jpg) · [Início em 1440 px](docs/redesign/inicio-desktop.jpg) · [Início em 360 px](docs/redesign/inicio-mobile.jpg) · [Cronograma em 768 px](docs/redesign/cronograma-tablet.jpg)
+- [Início no desktop](docs/studio/inicio-desktop.jpg) e [no celular](docs/studio/inicio-celular.jpg)
+- [Ciclos](docs/studio/ciclos.jpg), [Disciplinas](docs/studio/disciplinas.jpg) e [Questões](docs/studio/questoes.jpg)
+- [Materiais](docs/studio/materiais.jpg), [Provas](docs/studio/provas.jpg) e [Ferramentas](docs/studio/ferramentas.jpg)
+- [Perfil](docs/studio/perfil.jpg)
