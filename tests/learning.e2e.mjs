@@ -56,7 +56,7 @@ try{
  assert.equal((await state()).demo.learning,undefined,'Demo profiles isolate progress');
  await page.getByRole('button',{name:'Entrar',exact:true}).click(); await page.getByRole('button',{name:/Leo.*Engenharia/}).click();
  assert.equal((await state()).demo.learning.answers.length,6);
- await nav('Simulados ENEM'); await expect(page.locator('.exam-card')).toHaveCount(20);
+ await nav('Provas anteriores'); await expect(page.locator('.exam-card')).toHaveCount(20);
  await page.getByRole('button',{name:'Voltar',exact:true}).click();
  await expect(page.getByRole('heading',{name:/Oi, Leo/})).toBeVisible();
  await nav('Revisões');

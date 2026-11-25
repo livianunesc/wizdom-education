@@ -130,7 +130,7 @@ export function makePlan(profile, mood = "okay", date = new Date()) {
       : kind === "Conteúdo" ? `Leia o resumo de ${topic.title.toLowerCase()}, faça um exemplo resolvido e tente ${questions} questões com correção.`
       : `Retome as fórmulas e conceitos por 5 minutos. Resolva ${questions} questões de ${topic.title.toLowerCase()} e corrija cada erro.`;
     const task = {
-      id: `${dayKey(date)}-${topic.id}-${i}`, date: dayKey(date), topicId: topic.id,
+      id: `${dayKey(date)}-${topic.id}-${i}${profile.target?.id ? "-" + profile.target.id + "-" + profile.target.edition : ""}`, date: dayKey(date), topicId: topic.id,
       subject, title: topic.title, description: topic.description, activity,
       minutes: studyMinutes, breakAfter: i < count - 1 ? 5 : 0,
       start: timeLabel(cursor), end: timeLabel(cursor + studyMinutes), kind,

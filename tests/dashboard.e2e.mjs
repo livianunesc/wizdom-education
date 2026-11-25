@@ -59,7 +59,7 @@ try {
   await page.getByRole("button", { name: "Cronograma", exact: true }).click();
   await expect(page.locator(".sidebar")).not.toHaveClass(/open/);
   await expect(
-    page.getByRole("heading", { name: "Menos dúvida. Mais direção." }),
+    page.getByRole("heading", { name: "Meu cronograma" }),
   ).toBeVisible();
   for (const width of [320, 390, 768, 1280]) {
     await page.setViewportSize({ width, height: 900 });

@@ -12,14 +12,14 @@ function check(name, run) {
 }
 
 check(
-  "vestibulares: combine filters, inspect official details, favorite and see registration in calendar",
+  "vestibulares: combine filters, inspect official details, favorite without showing fictional registration",
   async ({ page }) => {
     await page.clock.setFixedTime(new Date("2026-11-13T12:00:00-03:00"));
     await page.goto(origin);
     await page
       .getByRole("button", { name: "Vestibulares", exact: true })
       .click();
-    await expect(page.locator(".university-card")).toHaveCount(8);
+    await expect(page.locator(".university-card")).toHaveCount(11);
     await selectChoice(page, "Curso", "Medicina");
     await selectChoice(page, "Instituição", "Pública");
     await selectChoice(page, "Região", "Sudeste");
@@ -42,23 +42,16 @@ check(
     await usp
       .getByRole("button", { name: "Favoritar USP", exact: true })
       .click();
-    await expect(page.getByRole("status")).toContainText("calendário");
+    await expect(page.getByRole("status")).toContainText("favorita salva");
     await page.getByRole("button", { name: "Favoritas (1)" }).click();
     await expect(page.locator(".university-card")).toHaveCount(1);
     await page.reload();
     await page.getByRole("button", { name: "Calendário", exact: true }).click();
-    // The prototype dates are intentionally illustrative; the clock is fixed for this example.
-    await expect(page.locator(".calendar-month-title h2")).toHaveText(
-      "novembro de 2026",
-    );
+    await expect(page.locator(".calendar-month-title h2")).toHaveText("novembro de 2026");
     await page.getByRole("button", { name: /^20 de novembro/ }).click();
-    await expect(page.locator(".calendar-side-event")).toContainText(
-      "Inscrições USP",
-    );
+    await expect(page.locator(".calendar-side-event")).toHaveCount(0);
     await page.getByRole("button", { name: "Agenda", exact: true }).click();
-    await expect(page.locator(".calendar-list-event")).toContainText(
-      "USP · inscrições",
-    );
+    await expect(page.locator(".calendar-list-event")).toHaveCount(0);
   },
 );
 
@@ -67,7 +60,7 @@ check(
   async ({ page }) => {
     await page.goto(origin);
     await page.getByRole("button", { name: "Olimpíadas", exact: true }).click();
-    await expect(page.locator(".olympic-card")).toHaveCount(4);
+    await expect(page.locator(".olympic-card")).toHaveCount(8);
     await page.getByRole("button", { name: "Matemática", exact: true }).click();
     await expect(page.locator(".olympic-card")).toHaveCount(1);
     await expect(page.locator(".olympic-card")).toContainText("OBMEP");
@@ -82,7 +75,7 @@ check(
       page.getByRole("heading", { name: "Novas descobertas, no seu momento." }),
     ).toBeVisible();
     await page.getByRole("button", { name: "Explorar oportunidades" }).click();
-    await expect(page.locator(".olympic-card")).toHaveCount(4);
+    await expect(page.locator(".olympic-card")).toHaveCount(8);
   },
 );
 
@@ -93,12 +86,12 @@ check(
     await page.getByRole("button", { name: "Ranking", exact: true }).click();
     await expect(page.locator(".rank-podium-person")).toHaveCount(3);
     await expect(page.locator(".ranking-self")).toHaveCount(1);
-    await page.getByRole("checkbox", { name: "Mostrar meu perfil no ranking" }).uncheck();
+    await page.getByRole("checkbox", { name: "Mostrar meu perfil no ranking" }).press("Space");
     await expect(page.locator(".ranking-self")).toHaveCount(0);
     await page.reload();
     await page.getByRole("button", { name: "Ranking", exact: true }).click();
     await expect(page.getByRole("checkbox", { name: "Mostrar meu perfil no ranking" })).not.toBeChecked();
-    await page.getByRole("checkbox", { name: "Mostrar meu perfil no ranking" }).check();
+    await page.getByRole("checkbox", { name: "Mostrar meu perfil no ranking" }).press("Space");
     await expect(page.locator(".ranking-self")).toHaveCount(1);
     await page.setViewportSize({ width: 390, height: 844 });
     expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(390);

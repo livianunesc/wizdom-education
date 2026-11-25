@@ -1,4 +1,4 @@
-import { universities } from "./admissions.js";
+import { universities, prioritiesFor } from "./admissions.js";
 import Character from "./Character.jsx";
 import Select from "./Select.jsx";
 import { useState } from "react";
@@ -262,6 +262,12 @@ export default function Onboarding({ name, initial, onComplete, onExit }) {
                 </div>
               </div>
             )}
+            {step === 2 && profile.target && <section className="notebook-panel">
+              <h3>Prévia do plano para a edição {profile.target.edition}</h3>
+              <p>{profile.days.length} dias por semana · até {Math.round(Number(profile.hours) * 60)} min por dia, com pausas.</p>
+              <ul>{prioritiesFor(profile.target.processId).map(item => <li key={item}>{item}</li>)}</ul>
+              <p>Recomendações de estudo. Consulte o edital para os requisitos oficiais.</p>
+            </section>}
             {step === 2 && (
               <div className="onboard-fields">
                 <label className="field">

@@ -12,7 +12,7 @@ import {
 import { universities, formatDate } from "../opportunities-data";
 import "./opportunities.css";
 
-export default function Calendar({ favorites = [], profile = {} }) {
+export default function Calendar({ favorites = [], profile = {}, scheduled = [] }) {
   const [month, setMonth] = useState(() => {
     const d = new Date();
     return new Date(d.getFullYear(), d.getMonth(), 1);
@@ -36,6 +36,8 @@ export default function Calendar({ favorites = [], profile = {} }) {
     { length: Math.ceil((offset + length) / 7) * 7 },
     (_, i) => i - offset + 1,
   );
+  const custom = scheduled.filter(task => task.date === dateKey(selected));
+  const personalTarget = profile.target?.date === dateKey(selected);
   const selectedEvents = events.filter((u) => u.opens === dateKey(selected));
   function move(n) {
     setMonth((d) => new Date(d.getFullYear(), d.getMonth() + n, 1));
@@ -132,6 +134,7 @@ export default function Calendar({ favorites = [], profile = {} }) {
                   const dayEvents = events.filter(
                     (e) => e.opens === dateKey(day),
                   );
+                  const hasCustom = profile.target?.date === dateKey(day) || scheduled.some(task => task.date === dateKey(day));
                   const isToday =
                     day === today.getDate() &&
                     month.getMonth() === today.getMonth() &&
@@ -151,7 +154,7 @@ export default function Calendar({ favorites = [], profile = {} }) {
                           <span> · inscrições</span>
                         </span>
                       ))}
-                      {planned(day) && (
+                      {(planned(day) || hasCustom) && (
                         <span className="calendar-study-dot">
                           <i /> <span>Dia de estudar</span>
                         </span>
@@ -240,6 +243,8 @@ export default function Calendar({ favorites = [], profile = {} }) {
                 </small>
               </div>
             )}
+            {personalTarget && <p><strong>Data pessoal de planejamento</strong> · {profile.course}</p>}
+            {custom.length > 0 && <ul>{custom.map(task => <li key={task.id}>{task.title} · {task.minutes} min</li>)}</ul>}
             {planned(selected) && (
               <div className="calendar-study-notice">
                 <BookOpen size={19} />

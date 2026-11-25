@@ -2,7 +2,7 @@ import Character, { CharacterEditor } from "./Character.jsx";
 import Shop from "./pages/Shop.jsx";
 import Duo from "./pages/Duo.jsx";
 import { credit, weekKey } from "./rewards.js";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import {
   ArrowLeft,
   FileText,
@@ -61,7 +61,7 @@ const navigation = [
   ["Cronograma", CalendarDays],
   ["Área de foco", Timer],
   ["Revisões", BookOpen],
-  ["Simulados ENEM", FileText],
+  ["Provas anteriores", FileText],
   ["Vestibulares", GraduationCap],
   ["Calendário", CalendarDays],
   ["Olimpíadas", Sprout],
@@ -78,6 +78,19 @@ export default function App() {
   const [auth, setAuth] = useState(null);
   const [toast, setToast] = useState("");
   const [mobile, setMobile] = useState(false);
+  const menuButton = useRef(null);
+  const closeMenuButton = useRef(null);
+  function closeMenu() {
+    setMobile(false);
+    menuButton.current?.focus();
+  }
+  useEffect(() => {
+    if (!mobile) return;
+    closeMenuButton.current?.focus();
+    const escape = event => { if (event.key === "Escape") closeMenu(); };
+    document.addEventListener("keydown", escape);
+    return () => document.removeEventListener("keydown", escape);
+  }, [mobile]);
   const [search, setSearch] = useState("");
   const [settings, setSettings] = useState(false);
   const [large, setLarge] = useState(false);
@@ -268,7 +281,7 @@ export default function App() {
         Ir para o conteúdo
       </a>
       {mobile && (
-        <div className="mobile-shade" onClick={() => setMobile(false)} />
+        <div className="mobile-shade" onClick={closeMenu} />
       )}
       <aside className={`sidebar ${mobile ? "open" : ""}`}>
         <a
@@ -286,7 +299,8 @@ export default function App() {
         <button
           className="mobile-close icon-button"
           aria-label="Fechar menu"
-          onClick={() => setMobile(false)}
+          ref={closeMenuButton}
+          onClick={closeMenu}
         >
           <X />
         </button>
@@ -348,6 +362,8 @@ export default function App() {
             <button
               className="icon-button hamburger"
               aria-label="Abrir menu"
+              ref={menuButton}
+              aria-expanded={mobile}
               onClick={() => setMobile(true)}
             >
               <Menu />
@@ -422,14 +438,13 @@ export default function App() {
         <main id="main-content" className="main-content">
           <div className="demo-notice" hidden={!demo}>
             <span>
-              <span className="tiny-dot" /> Você está conhecendo a WIZDOM. Os
-              dados deste espaço são demonstrativos.
+              <span className="tiny-dot" /> Você está no modo demonstração.
             </span>
             <button onClick={() => setAuth("signup")}>
               Criar minha conta <ArrowRight size={13} />
             </button>
           </div>
-          {page !== "Meu espaço" && <Character value={profile.character} className="notebook-vignette" scene={{ "Simulados ENEM": "exams", "Área de foco": "focus", "Cronograma": "agenda", "Calendário": "agenda", "Revisões": "review" }[page]} />}
+          {page !== "Meu espaço" && <Character value={profile.character} className="notebook-vignette" scene={{ "Provas anteriores": "exams", "Área de foco": "focus", "Cronograma": "agenda", "Calendário": "agenda", "Revisões": "review" }[page]} />}
           {page === "Loja" && <Shop {...shared} />}
           {page === "Meu espaço" && (
             <Dashboard
@@ -472,7 +487,7 @@ export default function App() {
               })} />
             </div>
           )}
-          {page === "Simulados ENEM" && <Exams />}
+          {page === "Provas anteriores" && <Exams />}
           {page === "Vestibulares" && (
             <Opportunities
               {...shared}
@@ -483,7 +498,7 @@ export default function App() {
             />
           )}
           {page === "Calendário" && (
-            <Calendar {...shared} favorites={student.favorites} />
+            <Calendar {...shared} favorites={student.favorites} scheduled={student.scheduled} />
           )}
           {page === "Olimpíadas" && <Olympics {...shared} favorites={student.olympicFavorites} toggleFavorite={id => update("olympicFavorites", items => (items || []).includes(id) ? items.filter(item => item !== id) : [...(items || []), id])} onPrepare={(item, level) => {
             const date = new Date();

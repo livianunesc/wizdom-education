@@ -1740,13 +1740,15 @@ input[type="checkbox"] {
     font-size: 15px;
   }
 }
-@media (max-width: 760px) {
+@media (max-width: 800px) {
   .sidebar {
+    visibility: hidden;
     width: 221px;
     transform: translateX(-100%);
     transition: transform 0.2s;
   }
   .sidebar.open {
+    visibility: visible;
     transform: translateX(0);
   }
   .mobile-shade {

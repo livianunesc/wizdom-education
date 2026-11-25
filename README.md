@@ -10,7 +10,7 @@ Seu futuro, no seu ritmo. Plataforma de estudos com interface pastel, cronograma
 
 Não precisa instalar Node.js, npm ou iniciar servidor. Código, estilos, fontes, ícones, cronogramas e flashcards estão no HTML. O app e os PDFs locais funcionam sem internet. Os links para INEP e universidades exigem conexão.
 
-Os dados ficam neste navegador. Mover o arquivo ou trocar de navegador pode criar outro armazenamento. Não há sincronização entre dispositivos.
+Os dados ficam neste navegador. Mover o arquivo ou trocar de navegador pode criar outro armazenamento. Perfis e saldo ficam separados por navegador. A versão hospedada oferece uma sala temporária compartilhada para foco em dupla.
 
 ## O que experimentar
 
@@ -24,11 +24,11 @@ Os dados ficam neste navegador. Mover o arquivo ou trocar de navegador pode cria
 - **Ofensivas e celebrações:** estudo registrado, revisão ou um minuto completo de foco acendem o dia. Ofensivas usam dias consecutivos do calendário local. Confetes e conquistas ao concluir revisão e foco; movimento reduzido é respeitado.
 - **Foco:** Pomodoro 30/5, temporizador e cronômetro. Cada minuto completo efetivamente estudado rende 4 XP e 2 moedas; descanso não rende pontos. Recuperação de sessão ocorre em pausa.
 - **Ranking:** pódio, posição, progresso de nível e participação opcional, separados por conta. Os colegas são fictícios; nenhuma informação pessoal é publicada.
-- **Vestibulares, calendário e olimpíadas:** filtros, favoritos, links oficiais e eventos internos. Datas e notas de corte dessas oportunidades são ilustrativas, com aviso na interface.
+- **Vestibulares, calendário e olimpíadas:** filtros, favoritos, links oficiais e eventos internos. Datas e notas de corte entram somente com fonte por edição. As fichas atuais direcionam aos portais oficiais. FUVEST, Comvest, Unesp, PUCs e federais aparecem como consultas oficiais quando faltam arquivos catalogados.
 
 ## Biblioteca de provas
 
-A seção Simulados ENEM cataloga 2016–2025. Estão incluídos **36 PDFs locais de 2017–2025**: provas e gabaritos correspondentes dos dois dias. **2016 ainda não tem PDFs locais**; os cards apontam para o acervo anual do INEP. O download direto dessa edição permanece bloqueado pela política de rede da máquina. Cadernos azuis da aplicação regular; a distribuição das áreas antes de 2017 é identificada. Consulte `docs/enem-fontes.md` e `docs/enem-arquivos.json` para procedência e verificações de cada PDF. Confira sempre ano, dia e cor antes de corrigir.
+A seção Provas anteriores cataloga 2016–2025. Estão incluídos **36 PDFs locais de 2017–2025**: provas e gabaritos correspondentes dos dois dias. **2016 ainda não tem PDFs locais**; os cards apontam para o acervo anual do INEP. O download direto dessa edição permanece bloqueado pela política de rede da máquina. Cadernos azuis da aplicação regular; a distribuição das áreas antes de 2017 é identificada. Consulte `docs/enem-fontes.md` e `docs/enem-arquivos.json` para procedência e verificações de cada PDF. Confira sempre ano, dia e cor antes de corrigir.
 
 ## Desenvolvimento
 
@@ -82,3 +82,25 @@ O teste standalone usa os bytes exatos do HTML gerado e bloqueia solicitações 
 - `tests/`: regras e testes de navegador.
 
 Esta versão foi importada do ZIP original e ampliada neste repositório.
+
+## Experimentar o foco em dupla
+
+1. Na raiz, execute `npm ci` e `npm run dev`. Os dois dispositivos precisam abrir a **mesma origem**, com `/api/duo` no mesmo servidor. Para testar em dispositivos físicos, coloque um proxy HTTPS na frente dessa origem. Web Crypto do cadastro local exige HTTPS, exceto em localhost.
+2. Abra em dois dispositivos ou em dois perfis de navegador separados. Em cada um, crie uma conta **local de teste**, conclua o onboarding e abra **Área de foco → Estudar com um amigo**.
+3. Em um, escolha **1 minuto** e crie a sala. Copie o link de convite ou passe o código ao outro dispositivo. O segundo entra e os dois confirmam prontidão.
+4. Experimente pausar e confirmar de novo nos dois dispositivos. Para testar a reconexão, deixe um deles offline por mais de oito segundos, volte à mesma origem, recarregue e confirme em ambos.
+5. Depois que ambos atingirem o fim da sessão, resgate **4 XP + 1 XP de bônus** por minuto, mais 2 moedas por minuto. O primeiro resgate na semana também completa a missão semanal. Recarregar e reenviar o resgate preserva o saldo.
+
+Para testar a compilação hospedada, use `npm run build` e `npm run preview -- --host "${WIZDOM_HOST:-127.0.0.1}" --port "${WIZDOM_PORT:-4173}"`. Veja `.env.example` para as opções desse comando. Vite hospeda a aplicação e o serviço juntos para desenvolvimento. Não há fornecedor externo, conta real ou segredo de configuração.
+
+O serviço de demonstração guarda as salas em memória, em um único processo, e usa tokens aleatórios por participante. O convite expira em 15 minutos e a sala após 24 horas. Reiniciar o servidor elimina as salas. O servidor envia somente os nomes de exibição e o estado da sessão aos participantes da sala. Os recibos são deduplicados por conta no navegador. Para operar um serviço público persistente, ainda são necessários autenticação de servidor, armazenamento durável e proteção operacional. A abertura por `ABRIR-WIZDOM.bat` continua oferecendo os recursos individuais do HTML local.
+
+## Cobertura do catálogo
+
+O catálogo inicial revisado tem **11 ofertas, 10 instituições, 7 cursos distintos e 5 regiões**. Os links de nove processos apontam às organizadoras e a biblioteca do INEP preserva 36 PDFs locais de 2017–2025. As outras bancas ainda precisam de verificação independente de edição, fase, caderno e gabarito. O proxy da máquina de desenvolvimento recusou a consulta direta aos portais durante a implementação. O calendário só exibe datas cadastradas com fonte e o catálogo ainda não contém inscrições confirmadas.
+
+As oito olimpíadas têm roteiro inicial e portal da organizadora. A confirmação de níveis específicos, datas e arquivos por edição segue pendente.
+
+## Capturas
+
+[Início anterior em 1440 px](docs/redesign/antes-desktop.jpg) · [Início em 1440 px](docs/redesign/inicio-desktop.jpg) · [Início em 360 px](docs/redesign/inicio-mobile.jpg) · [Cronograma em 768 px](docs/redesign/cronograma-tablet.jpg)

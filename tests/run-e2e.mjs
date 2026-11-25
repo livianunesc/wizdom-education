@@ -49,6 +49,7 @@ try {
     "tests/opportunities.e2e.mjs",
     "tests/focus.e2e.mjs",
     "tests/learning.e2e.mjs",
+    "tests/journey.e2e.mjs",
   ])
     await run(file);
 } finally {

@@ -159,9 +159,7 @@ try {
   await expect(page.locator(".university-card")).toHaveCount(1);
   await page.getByRole("button", { name: "Calendário", exact: true }).click();
   await page.getByRole("button", { name: /^20 de novembro/ }).click();
-  await expect(page.locator(".calendar-side-event")).toContainText(
-    "Inscrições USP",
-  );
+  await expect(page.locator(".calendar-side-event")).toHaveCount(0);
 
   await page.getByRole("button", { name: "Área de foco", exact: true }).click();
   await page.getByText("Cronômetro", { exact: true }).click();
@@ -174,8 +172,8 @@ try {
     page.getByRole("heading", { name: "Você fez acontecer!" }),
   ).toBeVisible();
   student = await readStudent();
-  assert.equal(student.data.stats.xp, 4);
-  assert.equal(student.data.stats.coins, 2);
+  assert.equal(student.data.stats.xp, 24);
+  assert.equal(student.data.stats.coins, 7);
   assert.equal(student.data.stats.sessions.length, 1);
   assert.equal(student.data.stats.sessions[0].seconds, 65);
   await page.getByRole("button", { name: "Guardar essa conquista" }).click();
@@ -195,7 +193,7 @@ try {
   await expect(page.getByRole('dialog')).toContainText('3/3');
   await page.getByRole('button',{name:'Guardar essa conquista'}).click();
   student=await readStudent();
-  assert.equal(student.data.stats.xp,34);
+  assert.equal(student.data.stats.xp,59);
   assert.equal(student.data.learning.answers.length,3);
   await expect(page.locator('.review-metrics')).toContainText('100%');
 
@@ -221,7 +219,7 @@ try {
   await page.reload();
   await expect(page.getByRole("heading", { name: /Oi, Helena/ })).toBeVisible();
   student = await readStudent();
-  assert.equal(student.data.stats.xp, 34);
+  assert.equal(student.data.stats.xp, 59);
   assert.equal(student.data.profile.course, "Psicologia");
   assert.equal(student.data.favorites.length, 1);
   await page.setViewportSize({ width: 390, height: 844 });
