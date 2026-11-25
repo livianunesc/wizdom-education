@@ -17,7 +17,8 @@ import {
 } from "lucide-react";
 import { useState } from "react";
 import { streakFor } from "./learning.js";
-import Illustration from "./Illustration.jsx";
+import Character from "./Character.jsx";
+import { flashcards } from "./flashcards-data.js";
 import { makePlan, dayKey, weekdays, studentType } from "./lib.js";
 import { universities } from "./opportunities-data.js";
 export const moods = [
@@ -103,6 +104,7 @@ export default function Dashboard({
   navigate,
   notify,
   onStudy,
+  learning,
 }) {
   const today = dayKey(),
     mood = checkins[today];
@@ -110,6 +112,8 @@ export default function Dashboard({
   const plan = makePlan(profile, mood);
   const isStudyDay = profile.days.includes(new Date().getDay());
   const done = completed[today] || [];
+  const next = plan.find(task => !done.includes(task.id));
+  const pending = flashcards.filter(card => learning?.topics.some(item => item.topicId === card.topicId) && (!learning.records[card.id]?.due || learning.records[card.id].due <= today)).length;
   const total = plan.reduce((s, t) => s + t.minutes + t.breakAfter, 0);
   const minutes = Math.floor(
     stats.sessions.reduce((s, x) => s + x.seconds, 0) / 60,
@@ -148,27 +152,19 @@ export default function Dashboard({
         <div className="dashboard-main">
           <section className="welcome-banner">
             <div>
-              <span className="badge white-badge">
-                <Sparkles size={13} /> NO SEU TEMPO, DO SEU JEITO
-              </span>
-              <h2>
-                Grandes sonhos.
-                <br />
-                Pequenos passos.
-              </h2>
-              <p>
-                Você não precisa dar conta de tudo hoje.
-                <br />
-                Só precisa começar por você.
-              </p>
-              <button
-                className="button primary"
-                onClick={() => navigate("Cronograma")}
-              >
-                Ver meu plano de estudos <ArrowRight size={16} />
+              <p className="eyebrow">Próxima atividade</p>
+              <h2>{next?.title || (isStudyDay ? "Atividades de hoje concluídas" : "Dia livre no cronograma")}</h2>
+              <p>{next ? `${next.subject} · ${next.minutes} minutos` : `${pending} questões pendentes`}</p>
+              <button className="button primary" onClick={() => next ? navigate("Área de foco", next) : navigate(pending ? "Revisões" : "Cronograma")}>
+                {next ? "Começar" : pending ? "Abrir revisões" : "Ver meu plano de estudos"} <ArrowRight size={16} />
               </button>
             </div>
-            <Illustration />
+            <Character value={profile.character} />
+          </section>
+          <section className="card notebook-panel">
+            <h2>Minha semana</h2>
+            <p>{profile.days.map(day => weekdays[day] || day).join(" · ")}</p>
+            <button className="button secondary" onClick={() => navigate("Revisões")}>{pending} questões pendentes</button>
           </section>
           <div className="stat-grid">
             <div className="stat-card">
@@ -347,18 +343,9 @@ export default function Dashboard({
               {favs.length ? (
                 favs.slice(0, 2).map((u) => (
                   <div className="aside-event" key={u.id}>
-                    <span className="event-date">
-                      {Number(u.opens.slice(8, 10))}
-                      <small>
-                        {new Date(u.opens + "T12:00:00").toLocaleDateString(
-                          "pt-BR",
-                          { month: "short" },
-                        )}
-                      </small>
-                    </span>
                     <div>
                       <strong>{u.acronym}</strong>
-                      <p>Abertura de inscrições*</p>
+                      <p>{u.opens ? 'Abertura de inscrições' : 'Consulte o calendário oficial'}</p>
                     </div>
                   </div>
                 ))

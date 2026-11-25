@@ -1,3 +1,5 @@
+import { credit } from "../rewards.js";
+import { dayKey } from "../lib.js";
 import Select from "../Select.jsx";
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
@@ -113,9 +115,7 @@ export default function Focus({
     rewardResult.current = earned;
     if (safeSeconds > 0)
       setStats((previous) => ({
-        ...previous,
-        xp: (previous.xp || 0) + earned.xp,
-        coins: (previous.coins || 0) + earned.coins,
+        ...credit(previous, { id: "solo:" + earned.id, xp: earned.xp, coins: earned.coins, day: dayKey(), label: "Foco individual" }),
         sessions: [...(previous.sessions || []), earned],
       }));
     if (safeSeconds >= 60 && onStudy) onStudy({ topicId: selected.topicId || topicsFor(selected.subject)[0].id, subject: selected.subject, id: selected.taskId, date: selected.taskDate });

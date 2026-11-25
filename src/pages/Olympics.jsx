@@ -55,8 +55,14 @@ const olympics = [
     eligibility: "Equipes de estudantes e professor · conforme edital",
     link: "https://www.olimpiadadehistoria.com.br/",
   },
+  { name: 'OBI', full: 'Olimpíada Brasileira de Informática', category: 'Computação', icon: Atom, tone: 'mint', description: 'Iniciação trabalha lógica no papel; Programação envolve escrever soluções na linguagem aceita pela edição.', eligibility: 'Modalidade e nível conforme ano escolar. Consulte o regulamento e a coordenação da escola.', link: 'https://olimpiada.ic.unicamp.br/', archive: 'https://olimpiada.ic.unicamp.br/pratique/' },
+  { name: 'OBG', full: 'Olimpíada Brasileira de Geografia', category: 'Geografia', icon: Globe2, tone: 'blue', description: 'Interprete mapas, fenômenos ambientais e relações entre território e sociedade em equipe.', eligibility: 'Consulte as séries e a composição da equipe no regulamento. Procure uma professora ou um professor orientador.', link: 'https://obgeografia.com.br/' },
+  { name: 'OBQ', full: 'Olimpíada Brasileira de Química', category: 'Química', icon: Atom, tone: 'peach', description: 'Pratique cálculos, interpretação de experimentos e conceitos de química. A classificação pode passar por etapas estaduais.', eligibility: 'Modalidade de acordo com a escolaridade e o regulamento. Consulte a coordenação estadual pela escola.', link: 'https://www.obquimica.org/' },
+  { name: 'OBR', full: 'Olimpíada Brasileira de Robótica', category: 'Robótica', icon: Sparkles, tone: 'lavender', description: 'Explore provas teóricas ou desafios práticos. Na modalidade prática, organize a equipe para montar, programar e testar o robô.', eligibility: 'A escolaridade define o nível. Consulte o regulamento para composição de equipes e inscrição.', link: 'https://www.obr.org.br/' },
 ];
-export default function Olympics({ profile = {} }) {
+export default function Olympics({ profile = {}, favorites = [], toggleFavorite, onPrepare }) {
+  const [levels, setLevels] = useState({});
+  const [saved, setSaved] = useState(false);
   const [browse, setBrowse] = useState(false);
   const [category, setCategory] = useState("Todas");
   const eligible = profile.school === "Ensino médio";
@@ -65,7 +71,7 @@ export default function Olympics({ profile = {} }) {
       <div className="page-heading">
         <div>
           <span className="eyebrow">APRENDER TAMBÉM É DESCOBRIR</span>
-          <h1>Desafios que abrem portas.</h1>
+          <h1>Olimpíadas</h1>
           <p className="muted">
             Olimpíadas do conhecimento para ir além da sala de aula.
           </p>
@@ -109,7 +115,7 @@ export default function Olympics({ profile = {} }) {
             </div>
           </div>
           <div className="olympics-categories" aria-label="Filtrar por área">
-            {["Todas", "Matemática", "Ciências", "Física", "História"].map(
+            {["Todas", ...new Set(olympics.map(item => item.category))].map(
               (c) => (
                 <button
                   className={`button secondary ${category === c ? "is-active" : ""}`}
@@ -121,9 +127,10 @@ export default function Olympics({ profile = {} }) {
               ),
             )}
           </div>
+          <button className="button secondary" aria-pressed={saved} onClick={() => setSaved(!saved)}>Somente favoritas</button>
           <div className="olympics-grid">
             {olympics
-              .filter((o) => category === "Todas" || category === o.category)
+              .filter(o => (category === "Todas" || category === o.category) && (!saved || favorites.includes(o.name)))
               .map((o) => (
                 <article className="card olympic-card" key={o.name}>
                   <div className={`olympic-card-icon tone-${o.tone}`}>
@@ -137,6 +144,16 @@ export default function Olympics({ profile = {} }) {
                     <GraduationCap size={16} />
                     {o.eligibility}
                   </p>
+                  <details className="notebook-panel">
+                    <summary>Preparar para {o.name}</summary>
+                    <ol><li>Leia o regulamento, confira sua modalidade e procure a coordenação da escola.</li>
+                      <li>{o.name === 'ONHB' ? 'Forme uma equipe com três estudantes e um professor. Distribuam leitura das fontes, discussão e revisão.' : 'Abra o material oficial e escolha um problema do seu nível.'}</li>
+                      <li>Tente resolver em 25 minutos e anote uma dúvida para revisar.</li></ol>
+                    {o.name === 'OBI' && <label>Modalidade<select value={levels.OBI || 'Iniciação'} onChange={event => setLevels({ OBI: event.target.value })}><option>Iniciação</option><option>Programação</option></select></label>}
+                    <p><a href={o.archive || o.link} target="_blank" rel="noreferrer">Consultar materiais oficiais</a></p>
+                    <button className="button primary" onClick={() => onPrepare(o, levels[o.name])}>Adicionar preparação ao cronograma</button>
+                  </details>
+                  <button className="button secondary" aria-pressed={favorites.includes(o.name)} onClick={() => toggleFavorite(o.name)}>{favorites.includes(o.name) ? 'Remover dos favoritos' : 'Favoritar ' + o.name}</button>
                   <a
                     className="university-details"
                     href={o.link}

@@ -13,7 +13,8 @@ import {
   X,
   Info,
 } from "lucide-react";
-import { universities, formatDate } from "../opportunities-data";
+import { universities, processes } from "../admissions.js";
+import TargetPlan from "./TargetPlan.jsx";
 import "./opportunities.css";
 
 export default function Opportunities({
@@ -21,7 +22,13 @@ export default function Opportunities({
   setFavorites,
   profile,
   notify,
+  setProfile,
+  navigate,
 }) {
+  const [query, setQuery] = useState("");
+  const [uf, setUf] = useState("");
+  const [entry, setEntry] = useState("");
+  const normalize = text => text.normalize("NFD").replace(/\p{Diacritic}/gu, "").toLowerCase();
   const [course, setCourse] = useState("");
   const [type, setType] = useState("");
   const [region, setRegion] = useState("");
@@ -37,6 +44,7 @@ export default function Opportunities({
   }, [detail]);
   const filtered = universities.filter(
     (u) =>
+      normalize(u.acronym + " " + u.name + " " + u.course).includes(normalize(query.trim())) && (!uf || u.uf === uf) && (!entry || u.entry === entry) &&
       (!course || u.course === course) &&
       (!type || u.type === type) &&
       (!region || u.region === region) &&
@@ -49,8 +57,8 @@ export default function Opportunities({
     );
     notify?.(
       exists
-        ? "Universidade removida dos favoritos e do calendário."
-        : "Universidade favorita! A abertura das inscrições já está no seu calendário.",
+        ? "Universidade removida dos favoritos."
+        : "Universidade favorita salva. Consulte a edição no portal oficial.",
     );
   }
   return (
@@ -58,7 +66,7 @@ export default function Opportunities({
       <div className="page-heading">
         <div>
           <span className="eyebrow">SEU PRÓXIMO CAPÍTULO</span>
-          <h1>Um mundo de possibilidades.</h1>
+          <h1>Vestibulares</h1>
           <p className="muted">
             Encontre a universidade que combina com o seu sonho.
           </p>
@@ -74,8 +82,7 @@ export default function Opportunities({
         <div>
           <h3>Seu futuro começa com uma descoberta</h3>
           <p>
-            Explore com calma. Favorite suas possibilidades e deixe as datas com
-            a gente.
+            Explore com calma. Salve suas opções e escolha um objetivo para o cronograma.
           </p>
         </div>
       </div>
@@ -86,6 +93,11 @@ export default function Opportunities({
         <div className="op-filter-label">
           <SlidersHorizontal size={17} />
           <strong>O que você está procurando?</strong>
+        </div>
+        <div className="notebook-grid notebook-panel">
+          <label>Pesquisar instituição ou curso<input value={query} onChange={e => setQuery(e.target.value)} /></label>
+          <label>UF<select value={uf} onChange={e => setUf(e.target.value)}><option value="">Todos os estados</option>{[...new Set(universities.map(item => item.uf))].sort().map(item => <option key={item}>{item}</option>)}</select></label>
+          <label>Ingresso<select value={entry} onChange={e => setEntry(e.target.value)}><option value="">Todos os processos</option>{[...new Set(universities.map(item => item.entry))].sort().map(item => <option key={item}>{item}</option>)}</select></label>
         </div>
         <div className="op-filter-grid">
           <label className="field">
@@ -131,10 +143,6 @@ export default function Opportunities({
           Favoritas ({favorites.length})
         </button>
       </div>
-      <p className="op-data-note">
-        <Info size={15} /> Datas e notas de corte ilustrativas para este
-        protótipo. Confirme sempre no edital oficial.
-      </p>
       <div className="op-university-grid">
         {filtered.map((u) => (
           <article className="card university-card" key={u.id}>
@@ -166,20 +174,8 @@ export default function Opportunities({
                 <span>Formas de ingresso</span>
                 <strong>{u.entry}</strong>
               </div>
-              <div>
-                <span>Nota ilustrativa</span>
-                <strong>
-                  {u.cutoff}
-                  <small> pontos</small>
-                </strong>
-              </div>
             </div>
-            <div className="university-date">
-              <CalendarDays size={16} />
-              <span>
-                Inscrições a partir de <strong>{formatDate(u.opens)}</strong>
-              </span>
-            </div>
+            <p className="university-date">Campus {u.campus}</p>
             <button className="university-details" onClick={() => setDetail(u)}>
               Conhecer universidade <ArrowRight size={17} />
             </button>
@@ -197,7 +193,7 @@ export default function Opportunities({
           <button
             className="button secondary"
             onClick={() => {
-              setCourse("");
+              setCourse(""); setQuery(""); setUf(""); setEntry("");
               setType("");
               setRegion("");
               setSaved(false);
@@ -234,32 +230,16 @@ export default function Opportunities({
             <p className="muted">
               {detail.city} · {detail.course}
             </p>
-            <p>{detail.detail}</p>
-            <div className="op-modal-facts">
-              <p>
-                <span>Formas de ingresso</span>
-                <strong>{detail.entry}</strong>
-              </p>
-              <p>
-                <span>Nota ilustrativa</span>
-                <strong>{detail.cutoff} pontos</strong>
-              </p>
-              <p>
-                <span>Inscrições ilustrativas</span>
-                <strong>
-                  {formatDate(detail.opens, {
-                    day: "numeric",
-                    month: "long",
-                    year: "numeric",
-                  })}{" "}
-                  a {formatDate(detail.closes)}
-                </strong>
-              </p>
-            </div>
-            <p className="op-data-note">
-              <Info size={16} /> Dados demonstrativos, sem validade como edital.
-              Notas reais variam por ano e modalidade de concorrência.
-            </p>
+            <p>Campus {detail.campus}{profile.target?.id === detail.id && ' · Meu objetivo'}</p>
+            <h3>Como entro?</h3><p>{detail.entry} · Consulte as modalidades no edital.</p>
+            <h3>O que cai?</h3><p>{processes[detail.processId].format || 'Consulte as disciplinas e etapas no edital da edição.'}</p>
+            <p>Datas, pesos, notas de corte e editais por edição: consulte o portal oficial.</p>
+            <h3>Qual meu próximo passo?</h3>
+            <TargetPlan offer={detail} profile={profile} onApply={target => {
+              setProfile(value => ({ ...value, target, course: detail.course }));
+              setDetail(null);
+              navigate('Cronograma');
+            }} />
             <a
               className="button primary"
               href={detail.link}
@@ -278,7 +258,7 @@ export default function Opportunities({
               />
               {favorites.includes(detail.id)
                 ? "Remover dos favoritos"
-                : "Favoritar e salvar no calendário"}
+                : "Favoritar"}
             </button>
           </section>
         </div>

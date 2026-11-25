@@ -22,7 +22,7 @@ export default function Calendar({ favorites = [], profile = {} }) {
   const today = new Date();
   const dateKey = (day) =>
     `${month.getFullYear()}-${String(month.getMonth() + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
-  const events = universities.filter((u) => favorites.includes(u.id));
+  const events = universities.filter((u) => favorites.includes(u.id) && u.opens);
   const monthEvents = events
     .filter((u) => u.opens.startsWith(dateKey(1).slice(0, 7)))
     .sort((a, b) => a.opens.localeCompare(b.opens));
@@ -262,8 +262,7 @@ export default function Calendar({ favorites = [], profile = {} }) {
             </p>
           </section>
           <p className="op-data-note">
-            Datas de inscrições demonstrativas. Consulte sempre os editais
-            oficiais.
+            Confira no edital oficial as datas que ainda não aparecem aqui.
           </p>
         </aside>
       </div>

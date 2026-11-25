@@ -1,3 +1,4 @@
+import { duoMiddleware } from './server/duo.mjs';
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import { viteSingleFile } from "vite-plugin-singlefile";
@@ -40,7 +41,11 @@ export default defineConfig({
   // Keep the development entry separate from the ready-to-open root index.html.
   root: fileURLToPath(new URL("./web", import.meta.url)),
   publicDir: false,
-  plugins: [examLibrary(), react(), viteSingleFile({ removeViteModuleLoader: true })],
+  plugins: [examLibrary(), {
+    name: 'wizdom-duo',
+    configureServer(server) { server.middlewares.use(duoMiddleware()); },
+    configurePreviewServer(server) { server.middlewares.use(duoMiddleware()); },
+  }, react(), viteSingleFile({ removeViteModuleLoader: true })],
   build: {
     outDir: fileURLToPath(new URL("./dist", import.meta.url)),
     emptyOutDir: true,

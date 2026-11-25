@@ -1,3 +1,5 @@
+import { credit } from "../rewards.js";
+import FlashRound from "./FlashRound.jsx";
 import { useState } from 'react';
 import { BookOpen, ArrowRight, Check, X, Flame, Target, Layers, RotateCcw, Sparkles, Plus, Clock3 } from 'lucide-react';
 import Select from '../Select.jsx';
@@ -8,7 +10,8 @@ import { learningState, streakFor, recordAnswer, noteActivity } from '../learnin
 import Celebration, { StreakWeek } from '../Celebration.jsx';
 import './reviews.css';
 
-export default function Reviews({ learning: value, setLearning, stats, setStats, onStudy }) {
+export default function Reviews({ learning: value, setLearning, stats, setStats, onStudy, authenticated }) {
+  const [mode, setMode] = useState("questions");
   const learning = learningState(value);
   const [topic, setTopic] = useState(topics[0]?.id || '');
   const [filter, setFilter] = useState('all');
@@ -34,7 +37,11 @@ export default function Reviews({ learning: value, setLearning, stats, setStats,
     const isCorrect = selected === card.answer;
     const {state,xp} = recordAnswer(learning,card,isCorrect);
     setLearning(state);
-    setStats(s=>({...noteActivity(s),xp:(s.xp||0)+xp}));
+    const day = dayKey();
+    setStats(stats => {
+      const earned = credit(noteActivity(stats), { id: `question:${day}:${card.id}`, xp, label: 'Questão · ' + topicById(card.topicId)?.subject, day });
+      return authenticated ? credit(earned, { id: 'review:' + day, xp: 5, coins: 2, label: 'Missão diária · revisar um assunto', day }) : earned;
+    });
     setFeedback({correct:isCorrect,xp});
   }
   function next() {
@@ -46,6 +53,8 @@ export default function Reviews({ learning: value, setLearning, stats, setStats,
   }
   return <div className="reviews-page">
     <div className="page-heading"><div><span className="eyebrow">CONHECIMENTO QUE FICA</span><h1>Relembrar é evoluir<span className="accent-dot">.</span></h1><p className="muted">Do seu estudo para a memória. Uma pequena conquista por vez.</p></div><span className="badge peach"><Flame size={16}/>{streakFor(stats)} {streakFor(stats)===1?"dia":"dias"} de ofensiva</span></div>
+    <div className="notebook-actions"><button className="button secondary" aria-pressed={mode === "questions"} onClick={() => setMode("questions")}>Questões</button><button className="button secondary" aria-pressed={mode === "flash"} onClick={() => setMode("flash")}>Flashcards com tempo</button></div>
+    {mode === "flash" ? <FlashRound stats={stats} setStats={setStats} /> : <>
     <div className="review-metrics"><div><span className="small-icon mint"><Target size={20}/></span><strong>{rate===null?'—':rate+'%'}</strong><span>taxa de acerto</span></div><div><span className="small-icon lavender"><Check size={20}/></span><strong>{correct}</strong><span>acertos</span></div><div><span className="small-icon pink"><RotateCcw size={20}/></span><strong>{errors}</strong><span>erros para aprender</span></div><div><span className="small-icon peach"><Layers size={20}/></span><strong>{due.length}</strong><span>cartões para hoje</span></div></div>
     {session ? <section className="review-session card">
       <div className="section-heading"><button className="text-button" onClick={()=>{setSession(null);setFeedback(null);}}>← Sair da revisão</button><span className="muted">{session.index+1} de {session.cards.length}</span></div>
@@ -60,5 +69,6 @@ export default function Reviews({ learning: value, setLearning, stats, setStats,
       <section className="card learned-topics"><h2>Sua trilha de conhecimento</h2>{learning.topics.length?<div className="learned-topic-grid">{learning.topics.map(t=>{const item=topicById(t.topicId);const cards=available.filter(c=>c.topicId===t.topicId);const count=cards.filter(c=>learning.records[c.id]).length;return <button key={t.topicId} onClick={()=>setFilter(t.topicId)} className={filter===t.topicId?'active':''}><span className="small-icon lavender"><BookOpen size={18}/></span><strong>{item?.title}</strong><small>{item?.subject} · {count}/3 cartões praticados</small><div className="progress-track"><i style={{width:`${count/3*100}%`}}/></div></button>})}</div>:<div className="review-empty"><Layers size={34}/><p>Sua trilha começa no primeiro assunto estudado.</p></div>}</section>
     </div><aside><section className="card streak-card"><span className="streak-flame"><Flame size={40} fill="currentColor"/></span><h2>{streakFor(stats)} {streakFor(stats)===1?"dia":"dias"} de ofensiva</h2><p className="muted">Estude, pratique ou conclua um minuto de foco para acender o dia.</p><StreakWeek stats={stats}/><div className="streak-goal"><strong>Próximo marco: {streakFor(stats)<7?7:streakFor(stats)<14?14:30} dias</strong><p>Seu ritmo tem valor, mesmo quando você recomeça.</p></div></section><section className="card spaced-note"><Clock3 size={24}/><h3>Revisar na hora certa</h3><p className="muted">Errou? O cartão volta amanhã. Acertou? Ele volta em 3 dias, depois 6, 12 e até 30 dias.</p><p className="muted">Você pode praticar antes. Cada cartão concede XP uma vez por dia.</p></section></aside></div>}
     {result&&<Celebration result={result} stats={stats} onClose={()=>setResult(null)}/>}
+    </>}
   </div>;
 }

@@ -1,3 +1,5 @@
+import { universities } from "./admissions.js";
+import Character from "./Character.jsx";
 import Select from "./Select.jsx";
 import { useState } from "react";
 import {
@@ -72,6 +74,7 @@ export default function Onboarding({ name, initial, onComplete, onExit }) {
         ...profile,
         name: profile.name.trim(),
         hours: Number(profile.hours),
+        course: universities.find(item => item.id === profile.target?.id)?.course || profile.course,
         onboarded: true,
       });
   }
@@ -102,7 +105,7 @@ export default function Onboarding({ name, initial, onComplete, onExit }) {
           <span className="auth-kicker">
             <Heart size={15} /> Feito para o seu momento
           </span>
-          <h1>
+          <Character className="notebook-vignette" /><h1>
             Não existe
             <br />
             um único jeito
@@ -191,6 +194,13 @@ export default function Onboarding({ name, initial, onComplete, onExit }) {
                 </label>
               </div>
             )}
+            {step === 0 && <label className="field">Objetivo de vestibular (opcional)
+              <Select value={profile.target?.id || ""} onChange={event => {
+                const offer = universities.find(item => item.id === event.target.value);
+                set("target", offer ? { id: offer.id, processId: offer.processId, edition: /^\d{4}$/.test(profile.year) ? profile.year : String(new Date().getFullYear() + 1), horizon: "8" } : null);
+              }}><option value="">Escolher depois</option>{universities.map(offer => <option key={offer.id} value={offer.id}>{offer.acronym} · {offer.course} · {offer.campus} · {offer.entry}</option>)}</Select>
+            </label>}
+            {step === 0 && profile.target && <label className="field">Edição pretendida<input type="number" required min="2000" max="2100" value={profile.target.edition} onChange={event => set("target", { ...profile.target, edition: event.target.value })}/></label>}
             {step === 1 && (
               <div className="onboard-fields">
                 <label className="field">

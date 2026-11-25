@@ -1,3 +1,4 @@
+import { prioritiesFor, processes } from "./admissions.js";
 import { topicsFor } from "./curriculum.js";
 export const subjects = [
   "Biologia",
@@ -65,12 +66,14 @@ export function planDetails(profile, now = new Date()) {
   const requested = Math.max(15, Math.min(480, Math.round((Number(profile.hours) || 1) * 60)));
   const window = routineWindow(profile);
   const minutes = Math.min(requested, window.capacity);
-  const year = Number(profile.year);
+  const year = Number(profile.target?.edition || profile.year);
   const horizon = Number.isFinite(year) ? year - now.getFullYear() : null;
-  const phase = horizon === null ? "Construção de base" : horizon <= 1 ? "Consolidação para a prova" : "Construção de base";
+  const personalDays = profile.target?.date ? (new Date(profile.target.date + "T12:00:00") - now) / 86_400_000 : Infinity;
+  const weeks = Math.min(Number(profile.target?.horizon || Infinity), personalDays / 7);
+  const phase = weeks <= 3 ? "Reta final e revisão de erros" : weeks <= 8 ? "Oito semanas de prática" : profile.target ? "Preparação do semestre" : horizon === null ? "Construção de base" : horizon <= 1 ? "Consolidação para a prova" : "Construção de base";
   return {
     requested, minutes, start: window.start, phase,
-    priorities: courseSubjects[profile.course] || ["Matemática", "Português", "Biologia"],
+    priorities: courseSubjects[profile.course?.startsWith("Engenharia") ? "Engenharia" : profile.course] || ["Matemática", "Português", "Biologia"],
     explanation: [
       `${profile.difficulty || "Matemática"} recebe reforço; ${profile.favorite || "Biologia"} ajuda a manter o ritmo.`,
       `As áreas de ${profile.course || "seu curso"} entram na rotação junto de todas as matérias do ENEM.`,
@@ -133,6 +136,20 @@ export function makePlan(profile, mood = "okay", date = new Date()) {
       start: timeLabel(cursor), end: timeLabel(cursor + studyMinutes), kind,
       tone: ["blue", "mint", "pink", "lavender", "peach"][i % 5],
     };
+    if (profile.target && !light) {
+      const id = profile.target.processId;
+      const priorities = prioritiesFor(id);
+      const index = (dayIndex + i) % priorities.length;
+      if (i === 0 && (processes[id]?.archive || id === 'enem')) {
+        task.activity = priorities[0] + '. Separe os últimos minutos para registrar seus erros.';
+        task.source = processes[id]?.archive;
+        task.library = id === 'enem';
+        task.kind = 'Prova anterior';
+      } else {
+        task.activity = priorities[index] + '. Use os minutos finais para registrar um ponto de melhoria.';
+        task.kind = index === 1 && id !== 'enem' ? 'Prática escrita' : 'Revisão de erros';
+      }
+    }
     cursor += studyMinutes + task.breakAfter;
     return task;
   });

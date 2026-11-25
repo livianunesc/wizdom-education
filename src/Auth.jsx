@@ -11,7 +11,7 @@ import {
   Flame,
   GraduationCap,
 } from "lucide-react";
-import Illustration from "./Illustration.jsx";
+import Character from "./Character.jsx";
 import "./auth.css";
 
 export default function Auth({ mode, setMode, onSubmit, onClose, onDemo }) {
@@ -78,7 +78,7 @@ export default function Auth({ mode, setMode, onSubmit, onClose, onDemo }) {
             <span className="auth-orbit orbit-one" aria-hidden="true" />
             <span className="auth-orbit orbit-two" aria-hidden="true" />
             <div className="auth-float-card auth-streak-card"><span><Flame size={21} /></span><div><strong>Um dia de cada vez</strong><small>Sua próxima conquista começa aqui</small></div></div>
-            <Illustration />
+            <Character />
             <div className="auth-float-card auth-plan-card"><span><Check size={17} /></span><div><strong>Um plano com a sua cara</strong><small>Tempo para estudar. Espaço para viver.</small></div></div>
             <span className="auth-spark spark-one" aria-hidden="true">✦</span><span className="auth-spark spark-two" aria-hidden="true">✧</span>
           </div>
@@ -98,7 +98,7 @@ export default function Auth({ mode, setMode, onSubmit, onClose, onDemo }) {
         <div className="auth-form-content">
           <span className="auth-welcome-icon"><GraduationCap size={26} /></span>
           <span className="eyebrow">SUA JORNADA COMEÇA AQUI</span>
-          <h2>
+          <Character className="auth-mobile-character notebook-vignette" /><h2>
             {signup ? "Um novo começo, juntos." : "Que bom ter você de volta."}
           </h2>
           <p className="muted">

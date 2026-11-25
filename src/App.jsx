@@ -1,3 +1,7 @@
+import Character, { CharacterEditor } from "./Character.jsx";
+import Shop from "./pages/Shop.jsx";
+import Duo from "./pages/Duo.jsx";
+import { credit, weekKey } from "./rewards.js";
 import { useState, useEffect } from "react";
 import {
   ArrowLeft,
@@ -51,6 +55,7 @@ import {
   dayKey,
   weekdays,
 } from "./lib.js";
+const subjectsForOlympics = { Física: "Física", Ciências: "Física", História: "História", Geografia: "Geografia", Química: "Química" };
 const navigation = [
   ["Meu espaço", LayoutDashboard],
   ["Cronograma", CalendarDays],
@@ -62,11 +67,12 @@ const navigation = [
   ["Olimpíadas", Sprout],
   ["Ranking", Trophy],
   ["Meu perfil", UserRound],
+  ["Loja", Coins],
 ];
 export default function App() {
   useDialogFocus();
-  const [store, setStore] = useState(safeLoad);
-  const [page, setPage] = useState("Meu espaço");
+  const [store, renderStore] = useState(safeLoad);
+  const [page, setPage] = useState(() => new URLSearchParams(location.search).has("duo") ? "Área de foco" : "Meu espaço");
   const [history, setHistory] = useState([]);
   const [focusTask, setFocusTask] = useState(null);
   const [auth, setAuth] = useState(null);
@@ -80,15 +86,27 @@ export default function App() {
   const student = account?.data || store.demo;
   const profile = student.profile;
   const demo = !account;
+  function setStore(change) {
+    const apply = () => {
+      const previous = safeLoad();
+      const next = change(previous);
+      if (next === previous) return;
+      try {
+        localStorage.setItem("wizdom.v1", JSON.stringify(next));
+        renderStore(next);
+      } catch {
+        setToast("Não foi possível salvar os dados do navegador.");
+      }
+    };
+    if (navigator.locks) return navigator.locks.request("wizdom.store", apply);
+    apply();
+  }
   useEffect(() => {
-    try {
-      localStorage.setItem("wizdom.v1", JSON.stringify(store));
-    } catch {
-      setToast(
-        "O armazenamento está cheio. Fotos grandes podem não ser salvas.",
-      );
-    }
-  }, [store]);
+    if (!localStorage.getItem("wizdom.v1")) setStore(value => ({ ...value }));
+    const refresh = event => { if (event.key === "wizdom.v1") renderStore(safeLoad()); };
+    window.addEventListener("storage", refresh);
+    return () => window.removeEventListener("storage", refresh);
+  }, []);
   useEffect(() => {
     if (toast) {
       const id = setTimeout(() => setToast(""), 5000);
@@ -112,7 +130,7 @@ export default function App() {
     setToast(s);
   }
   function update(key, value) {
-    setStore((s) => {
+    return setStore((s) => {
       const apply = (d) => ({
         ...d,
         [key]: typeof value === "function" ? value(d[key]) : value,
@@ -121,12 +139,23 @@ export default function App() {
         ? {
             ...s,
             accounts: s.accounts.map((a) =>
-              a.id === s.current ? { ...a, data: apply(a.data) } : a,
+              a.id === account.id ? { ...a, data: apply(a.data) } : a,
             ),
           }
         : { ...s, demo: apply(s.demo) };
     });
   }
+  useEffect(() => {
+    if (!account) return;
+    const grant = () => {
+      const day = dayKey();
+      update("stats", stats => credit(stats, { id: 'login:' + day, xp: 20, coins: 5, label: 'Acesso diário', day }));
+    };
+    grant();
+    const timer = setInterval(grant, 60_000);
+    window.addEventListener('focus', grant);
+    return () => { clearInterval(timer); window.removeEventListener('focus', grant); };
+  }, [account?.id]);
   function navigate(p, task = null) {
     setFocusTask(task);
     if (p !== page) setHistory(h => [...h, page]);
@@ -161,7 +190,11 @@ export default function App() {
     if(!topicById(id)) return;
     update("learning",v=>registerTopic(v,id));
     update("stats",s=>noteActivity(s));
-    if(task.id && task.date && task.date <= dayKey()) update("completed", v=>({...v,[task.date]:[...new Set([...(v[task.date]||[]),task.id])]}));
+    if (task.id && task.date && task.date <= dayKey()) {
+      update("completed", v => ({ ...v, [task.date]: [...new Set([...(v[task.date] || []), task.id])] }));
+      const day = dayKey();
+      if (account) update("stats", stats => credit(stats, { id: 'block:' + day, label: 'Missão diária · concluir um bloco', day, xp: 10, coins: 2 }));
+    }
     notify("Assunto estudado! Três flashcards estão disponíveis nas revisões.");
     if(openReviews) navigate("Revisões");
   }
@@ -173,7 +206,7 @@ export default function App() {
       const salt = crypto.randomUUID(),
         hash = await passwordHash(password, salt),
         id = crypto.randomUUID();
-      setStore((s) => ({
+      await setStore((s) => ({
         ...s,
         current: id,
         accounts: [
@@ -182,15 +215,15 @@ export default function App() {
         ],
       }));
       setAuth(null);
-      navigate("Meu espaço");
+      navigate(new URLSearchParams(location.search).has("duo") ? "Área de foco" : "Meu espaço");
       return;
     }
     const a = store.accounts.find((a) => a.email === email);
     if (!a || (await passwordHash(password, a.salt)) !== a.hash)
       return "E-mail ou senha não encontrados neste navegador.";
-    setStore((s) => ({ ...s, current: a.id }));
+    await setStore((s) => ({ ...s, current: a.id }));
     setAuth(null);
-    navigate("Meu espaço");
+    navigate(new URLSearchParams(location.search).has("duo") ? "Área de foco" : "Meu espaço");
     notify("Que bom ter você de volta!");
   }
   const shared = {
@@ -228,6 +261,7 @@ export default function App() {
     );
   return (
     <div
+      data-theme={student.stats.theme || "caderno"}
       className={`app ${large ? "large-type" : ""} ${contrast ? "high-contrast" : ""}`}
     >
       <a className="skip-link" href="#main-content">
@@ -352,8 +386,9 @@ export default function App() {
             </div>
             <button
               className="coin-pill"
-              onClick={() => navigate("Meu perfil")}
+              onClick={() => navigate("Loja")}
               title="Suas moedas"
+              aria-label={student.stats.coins + " moedas, abrir loja"}
             >
               <Coins size={16} />
               {student.stats.coins}
@@ -394,10 +429,13 @@ export default function App() {
               Criar minha conta <ArrowRight size={13} />
             </button>
           </div>
+          {page !== "Meu espaço" && <Character value={profile.character} className="notebook-vignette" scene={{ "Simulados ENEM": "exams", "Área de foco": "focus", "Cronograma": "agenda", "Calendário": "agenda", "Revisões": "review" }[page]} />}
+          {page === "Loja" && <Shop {...shared} />}
           {page === "Meu espaço" && (
             <Dashboard
               {...shared}
               onStudy={study}
+              learning={student.learning}
               checkins={student.checkins}
               setCheckins={(v) => update("checkins", v)}
               completed={student.completed}
@@ -410,6 +448,8 @@ export default function App() {
             <Schedule
               profile={profile}
               mood={student.checkins[dayKey()]}
+              scheduled={student.scheduled}
+              setScheduled={value => update("scheduled", items => value(items || []))}
               completed={student.completed}
               navigate={navigate}
               onStudy={study}
@@ -422,23 +462,54 @@ export default function App() {
             />
           )}
           {page === "Área de foco" && (
-            <Focus {...shared} initialTask={focusTask} onStudy={(t)=>study(t,false)} onReview={()=>navigate("Revisões")} />
+            <div key={account?.id || "demo"}>
+              <Focus {...shared} initialTask={focusTask} onStudy={(t)=>study(t,false)} onReview={()=>navigate("Revisões")} />
+              <Duo accountId={account?.id} name={profile.name} onLogin={() => setAuth("login")} reward={receipt => update("stats", stats => {
+                const day = dayKey();
+                const earned = credit(stats, { id: receipt.id, label: "Foco em dupla", xp: receipt.base + receipt.bonus, coins: receipt.coins, day });
+                if (earned === stats) return stats;
+                return credit(earned, { id: "duo-week:" + weekKey(new Date(), dayKey), label: "Missão semanal · foco em dupla", xp: 15, coins: 3, day });
+              })} />
+            </div>
           )}
           {page === "Simulados ENEM" && <Exams />}
           {page === "Vestibulares" && (
             <Opportunities
               {...shared}
               favorites={student.favorites}
+              navigate={navigate}
+              setProfile={value => update("profile", value)}
               setFavorites={(v) => update("favorites", v)}
             />
           )}
           {page === "Calendário" && (
             <Calendar {...shared} favorites={student.favorites} />
           )}
-          {page === "Olimpíadas" && <Olympics {...shared} />}
+          {page === "Olimpíadas" && <Olympics {...shared} favorites={student.olympicFavorites} toggleFavorite={id => update("olympicFavorites", items => (items || []).includes(id) ? items.filter(item => item !== id) : [...(items || []), id])} onPrepare={(item, level) => {
+            const date = new Date();
+            const key = dayKey(date);
+            const base = makePlan(profile, null, date);
+            const booked = (student.scheduled || []).filter(task => task.date === key);
+            const occupied = [...base.filter(task => !booked.some(item => item.id === task.id)), ...booked].reduce((sum, task) => sum + task.minutes + task.breakAfter, 0);
+            if (occupied + 25 > Math.max(25, Number(profile.hours || 1) * 60)) {
+              do { date.setDate(date.getDate() + 1); } while (profile.days?.length && profile.days.length < 7 && (profile.days.includes(date.getDay()) || (student.scheduled || []).some(task => task.date === dayKey(date))));
+              if (profile.days?.includes(date.getDay())) {
+                notify("Sua agenda está cheia. Libere um bloco antes de adicionar a preparação.");
+                return;
+              }
+            }
+            const task = { id: "olympic:" + item.name + ":" + dayKey(date), date: dayKey(date), subject: subjectsForOlympics[item.category] || "Matemática", title: "Preparação " + item.name, minutes: 25, breakAfter: 0, kind: level || "Treino", tone: "mint", start: "Flexível", activity: "Escolha um problema da sua modalidade. Tente resolver e anote uma dúvida.", source: item.archive || item.link };
+            update("scheduled", items => (items || []).some(entry => entry.id === task.id) ? items : [...(items || []), task]);
+            notify("Preparação agendada para " + date.toLocaleDateString("pt-BR") + ".");
+            navigate("Cronograma");
+          }} />}
           {page === "Ranking" && <Ranking {...shared} />}
           {page === "Meu perfil" && (
-            <Profile {...shared} setProfile={(v) => update("profile", v)} />
+            <>
+              <Profile {...shared} setProfile={(v) => update("profile", v)} />
+              <section className="card notebook-panel"><h2>Meu objetivo</h2><p>{profile.target ? `${profile.course} · edição ${profile.target.edition}` : "Escolha uma instituição, curso e processo."}</p><button className="button secondary" onClick={() => navigate("Vestibulares")}>Escolher objetivo</button></section>
+              <CharacterEditor profile={profile} setProfile={value => update("profile", value)} />
+            </>
           )}
           {page === "Revisões" && (
             <Reviews
@@ -448,6 +519,7 @@ export default function App() {
               stats={student.stats}
               setStats={(v) => update("stats", v)}
               onStudy={study}
+              authenticated={Boolean(account)}
               notify={notify}
             />
           )}
@@ -517,12 +589,12 @@ export default function App() {
                 <h3>Um protótipo, no seu navegador</h3>
                 <p>
                   Cadastro e dados são locais. Não há autenticação em servidor,
-                  envio de e-mails ou sincronização entre dispositivos. Não use
+                  envio de e-mails nem sincronização de perfis. O foco em dupla compartilha a sala e o nome exibido. Não use
                   sua senha real. As senhas de teste são armazenadas como hash,
                   mas isto não substitui um sistema de autenticação de produção.
                 </p>
                 <p>
-                  O ranking e as informações de inscrições são exemplos. Nenhum
+                  O ranking usa participantes fictícios. Nenhum
                   dado pessoal é publicado.
                 </p>
               </div>

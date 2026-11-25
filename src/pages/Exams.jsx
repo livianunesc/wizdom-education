@@ -1,15 +1,25 @@
+import { processes } from "../admissions.js";
 import { useState } from "react";
 import { ArrowUpRight, BookOpen, CheckCheck, Clock3, Download, FileText, GraduationCap, Search, ShieldCheck, Sparkles } from "lucide-react";
 import { exams, examYears, ENEM_SOURCE } from "../exams-data.js";
 import "./exams.css";
 
 export default function Exams() {
+  const [bank, setBank] = useState("enem");
   const [year, setYear] = useState("Todos");
   const [day, setDay] = useState(0);
   const [search, setSearch] = useState("");
   const visible = exams.filter((exam) => (year === "Todos" || exam.year === year) && (!day || exam.day === day) && `${exam.year} ${exam.areas}`.toLocaleLowerCase("pt-BR").includes(search.toLocaleLowerCase("pt-BR")));
   return <div className="exams-page">
-    <div className="page-heading"><div><span className="eyebrow">TREINAR TAMBÉM É CONSTRUIR CONFIANÇA</span><h1>Seu próximo ensaio para o ENEM.</h1><p className="muted">Provas de verdade. Um passo a mais na sua preparação.</p></div><span className="badge"><ShieldCheck size={15}/> Cadernos do INEP</span></div>
+    <div className="page-heading"><div><span className="eyebrow">TREINAR TAMBÉM É CONSTRUIR CONFIANÇA</span><h1>Provas anteriores</h1><p className="muted">Provas de verdade. Um passo a mais na sua preparação.</p></div><span className="badge"><ShieldCheck size={15}/> Cadernos do INEP</span></div>
+    <section className="card notebook-panel">
+      <label>Banca ou processo<select value={bank} onChange={event => setBank(event.target.value)}>{Object.entries(processes).map(([id, item]) => <option key={id} value={id}>{item.name}</option>)}</select></label>
+    </section>
+    {bank !== 'enem' ? <section className="card notebook-panel">
+      <h2>{processes[bank].name}</h2>
+      <p>Página oficial de consulta. Confira a edição, a fase e o tipo de correção junto da prova.</p>
+      <a className="button primary" href={processes[bank].archive || processes[bank].portal} target="_blank" rel="noreferrer">Abrir consulta oficial <ArrowUpRight size={16}/></a>
+    </section> : <>
     <section className="exam-hero">
       <div><span className="exam-hero-kicker"><Sparkles size={16}/> SUA BIBLIOTECA DE PROVAS</span><h2>O grande dia começa<br/>com um pequeno treino.</h2><p>Escolha uma edição, reserve seu tempo e pratique. Depois, confira o gabarito da mesma cor e transforme cada erro em aprendizado.</p><a className="button primary" href={ENEM_SOURCE} target="_blank" rel="noopener noreferrer">Explorar acervo do INEP <ArrowUpRight size={17}/></a></div>
       <div className="exam-stack" aria-hidden="true"><div className="exam-paper back"><GraduationCap size={26}/><span>SEU FUTURO</span><strong>começa<br/>aqui.</strong></div><div className="exam-paper front"><div><FileText size={23}/><span>ENEM</span></div><strong>Uma questão<br/>de cada vez.</strong><i/><i/><i/><span className="paper-stamp"><CheckCheck size={15}/> Você consegue.</span></div></div>
@@ -31,5 +41,6 @@ export default function Exams() {
     </section>
     <div className="exam-notes"><ShieldCheck size={21}/><p><strong>Provas oficiais, cópias locais.</strong> Os PDFs de 2017–2025 estão incluídos nesta pasta e abrem mesmo sem internet. Mantenha a pasta “provas” junto de “index.html”. Os links para o acervo do INEP precisam de internet. Em 2016, as áreas eram distribuídas de outra forma; o acesso é pelo acervo anual. Confira sempre o ano, o dia e a cor antes de corrigir.</p></div>
     <section className="exam-tips"><span>SEU RITUAL DE SIMULADO</span><div><p><b>01</b><strong>Prepare seu espaço</strong>Água, papel, caneta e celular longe.</p><p><b>02</b><strong>Respeite seu tempo</strong>Use a área de foco e pratique sem consulta.</p><p><b>03</b><strong>Aprenda com os erros</strong>Revise o assunto e volte às questões.</p></div></section>
+    </>}
   </div>;
 }
