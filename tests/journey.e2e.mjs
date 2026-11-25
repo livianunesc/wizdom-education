@@ -1,13 +1,9 @@
+import { navigateUnit } from "./ui-helpers.mjs";
 import { chromium, expect } from '@playwright/test';
 import { initialProfile, newStudent } from '../src/lib.js';
 
 const browser = await chromium.launch({ executablePath: process.env.CHROMIUM_PATH || '/usr/bin/chromium', args: ['--no-sandbox'] });
 const origin = process.env.BASE_URL || 'http://127.0.0.1:5173';
-const navigate = async (page, name) => {
-  const menu = page.getByRole('button', { name: 'Abrir menu', exact: true });
-  if (await menu.isVisible()) await menu.click();
-  await page.getByRole('button', { name, exact: true }).click();
-};
 
 async function account(name, width, fixedTime) {
   const context = await browser.newContext({ viewport: { width, height: 900 } });
@@ -27,7 +23,7 @@ async function account(name, width, fixedTime) {
 
 try {
   const { page, context } = await account('Lia', 1440, new Date('2026-11-23T12:00:00-03:00'));
-  await navigate(page, 'Vestibulares');
+  await navigateUnit(page, 'Vestibulares');
   await page.getByLabel('Pesquisar instituição ou curso').fill('engenharia mecanica');
   await page.getByRole('button', { name: 'Conhecer universidade' }).click();
   await page.getByRole('button', { name: 'Usar como meu objetivo' }).click();
@@ -39,7 +35,7 @@ try {
   await page.getByRole('button', { name: 'Revisar agora' }).click();
   await page.locator('.answer-options button').first().click();
   await page.getByRole('button', { name: 'Conferir resposta' }).click();
-  await navigate(page, 'Loja');
+  await navigateUnit(page, 'Loja');
   await page.getByRole('button', { name: 'Comprar Jardim' }).click();
   await expect(page.locator('.app')).toHaveAttribute('data-theme', 'jardim');
   await page.getByRole('button', { name: 'Equipar Caderno' }).click();
@@ -47,7 +43,7 @@ try {
   await expect(page.locator('.app')).toHaveAttribute('data-theme', 'jardim');
   await page.reload();
   await expect(page.locator('.app')).toHaveAttribute('data-theme', 'jardim');
-  await navigate(page, 'Revisões');
+  await navigateUnit(page, 'Revisões');
   const flash = async () => {
     await page.getByRole('button', { name: 'Flashcards com tempo' }).click();
     await page.getByRole('button', { name: 'Começar rodada pontuada' }).click();
@@ -61,16 +57,16 @@ try {
   await flash();
   await expect.poll(xp).toBe(beforeFlash + 15);
   await page.reload();
-  await navigate(page, 'Revisões');
+  await navigateUnit(page, 'Revisões');
   await flash();
   await expect(page.getByText('0 XP creditados')).toBeVisible();
   expect(await xp()).toBe(beforeFlash + 15);
-  await navigate(page, 'Provas anteriores');
+  await navigateUnit(page, 'Provas anteriores');
   const proof = await page.getByRole('link', { name: 'Abrir prova ENEM 2025, 1º dia' }).getAttribute('href');
   const pdf = await page.request.get(new URL(proof, origin).href);
   expect(pdf.ok()).toBe(true);
   expect((await pdf.body()).subarray(0, 4).toString()).toBe('%PDF');
-  await navigate(page, 'Olimpíadas');
+  await navigateUnit(page, 'Olimpíadas');
   await page.getByText('Preparar para OBI', { exact: true }).click();
   await page.getByLabel('Modalidade').selectOption('Programação');
   await page.getByRole('button', { name: 'Adicionar preparação ao cronograma' }).click();
@@ -80,14 +76,11 @@ try {
   for (const width of [360, 768, 1440]) {
     await page.setViewportSize({ width, height: 900 });
     for (const name of ['Meu espaço', 'Vestibulares', 'Provas anteriores', 'Cronograma', 'Calendário', 'Olimpíadas', 'Revisões', 'Área de foco', 'Ranking', 'Meu perfil', 'Loja']) {
-      await navigate(page, name);
-      if (width <= 800) {
-        await expect(page.locator('.sidebar')).toBeHidden();
-        await expect(page.getByRole('button', { name: 'Abrir menu' })).toBeVisible();
-      }
+      await navigateUnit(page, name);
+      await expect(page.locator('#studio-menu')).toBeHidden();
+      await expect(page.getByRole('button', { name: 'Abrir menu' })).toHaveAttribute('aria-expanded', 'false');
       await expect(page.locator('h1')).toBeVisible();
       expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(width);
-      await expect(page.locator('.main-content .notebook-character').first()).toBeVisible();
     }
   }
   await context.close();
@@ -95,7 +88,7 @@ try {
 
   const a = await account('Lia Dupla', 1440);
   const b = await account('Sol Dupla', 360);
-  await navigate(a.page, 'Área de foco');
+  await navigateUnit(a.page, 'Área de foco');
   await a.page.getByLabel('Duração em minutos').fill('1');
   await a.page.getByRole('button', { name: 'Criar sala privada' }).click();
   const invite = await a.page.getByRole('link', { name: 'Link de convite' }).getAttribute('href');

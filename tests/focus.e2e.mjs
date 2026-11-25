@@ -1,3 +1,4 @@
+import { navigateUnit } from "./ui-helpers.mjs";
 import assert from "node:assert/strict";
 import { chromium, expect } from "@playwright/test";
 
@@ -18,10 +19,9 @@ async function withStudent(check) {
   page.on("dialog", (dialog) => dialog.accept());
   try {
     await page.clock.install({ time: new Date("2026-11-13T18:00:00Z") });
+    await page.clock.pauseAt(new Date("2026-11-13T18:01:00Z"));
     await page.goto(baseURL);
-    await page
-      .getByRole("button", { name: "Área de foco", exact: true })
-      .click();
+    await navigateUnit(page, "Área de foco");
     await check(page);
     assert.deepEqual(errors, [], "The page must not emit JavaScript errors");
   } finally {
@@ -57,9 +57,8 @@ try {
     await expect(
       page.getByRole("heading", { name: "Você fez acontecer!" }),
     ).toBeVisible();
+    await expect.poll(() => statsOf(page)).toMatchObject({ xp: 8, coins: 4 });
     let stats = await statsOf(page);
-    assert.equal(stats.xp, 8, "Only the two complete study minutes earn XP");
-    assert.equal(stats.coins, 4);
     assert.equal(stats.sessions.length, 1);
     assert.equal(
       stats.sessions[0].seconds,
@@ -75,9 +74,7 @@ try {
     await start(page);
     await page.clock.fastForward(40_000);
     await page.reload();
-    await page
-      .getByRole("button", { name: "Área de foco", exact: true })
-      .click();
+    await navigateUnit(page, "Área de foco");
     await expect(
       page.getByRole("button", { name: "Continuar", exact: true }),
     ).toBeVisible();
@@ -90,29 +87,21 @@ try {
     await expect(
       page.getByRole("heading", { name: "Você fez acontecer!" }),
     ).toBeVisible();
+    await expect.poll(() => statsOf(page)).toMatchObject({ xp: 12, coins: 6 });
     stats = await statsOf(page);
-    assert.equal(
-      stats.xp,
-      12,
-      "Recovered session must reward only its completed minute",
-    );
-    assert.equal(stats.coins, 6);
     assert.equal(stats.sessions.length, 2);
     assert.equal(stats.sessions[1].seconds, 65);
     await dismissReward(page);
 
-    await page.getByRole("button", { name: "Meu perfil", exact: true }).click();
+    await navigateUnit(page, "Meu perfil");
     await page.getByRole("button", { name: "Editar perfil" }).click();
     await page
       .getByLabel("Quando quero ingressar")
       .fill("Ainda estou descobrindo");
     await page.getByRole("button", { name: "Salvar meu perfil" }).click();
-    assert.equal(
-      await page.evaluate(
-        () => JSON.parse(localStorage.getItem("wizdom.v1")).demo.profile.year,
-      ),
-      "Ainda estou descobrindo",
-    );
+    await expect.poll(() =>
+      page.evaluate(() => JSON.parse(localStorage.getItem("wizdom.v1")).demo.profile.year),
+    ).toBe("Ainda estou descobrindo");
   });
   console.log(
     "PASS focus: pause/resume, actual rewards, paused refresh recovery, flexible profile year",
@@ -134,9 +123,8 @@ try {
     await expect(
       page.getByRole("heading", { name: "Respire. Você está indo bem." }),
     ).toBeVisible();
+    await expect.poll(() => statsOf(page)).toMatchObject({ xp: 120, coins: 60 });
     let stats = await statsOf(page);
-    assert.equal(stats.xp, 120);
-    assert.equal(stats.coins, 60);
     assert.equal(stats.sessions[0].seconds, 1_800);
     await page.clock.fastForward(300_000);
     await expect(
@@ -152,36 +140,30 @@ try {
     );
     await dismissReward(page);
 
-    await page.getByRole("button", { name: "Meu perfil", exact: true }).click();
+    await navigateUnit(page, "Meu perfil");
     await expect(page.locator(".profile-person .badge")).toHaveText("Nível 2");
     await page
       .locator(".shop-item")
       .filter({ hasText: "Brisa de menta" })
       .getByRole("button", { name: "Resgatar" })
       .click();
-    stats = await statsOf(page);
-    assert.equal(stats.coins, 10);
-    assert.equal(stats.outfit, "menta");
-    assert.deepEqual(stats.owned, ["lavanda", "menta"]);
+    await expect.poll(() => statsOf(page)).toMatchObject({
+      coins: 10, outfit: "menta", owned: ["lavanda", "menta"],
+    });
     await page
       .locator(".shop-item")
       .filter({ hasText: "Lavanda" })
       .getByRole("button", { name: "Usar", exact: true })
       .click();
+    await expect.poll(() => statsOf(page)).toMatchObject({ coins: 10, outfit: "lavanda" });
     await page
       .locator(".shop-item")
       .filter({ hasText: "Brisa de menta" })
       .getByRole("button", { name: "Usar", exact: true })
       .click();
-    assert.equal(
-      (await statsOf(page)).coins,
-      10,
-      "Equipping an owned item must be free",
-    );
+    await expect.poll(() => statsOf(page)).toMatchObject({ coins: 10, outfit: "menta" });
 
-    await page
-      .getByRole("button", { name: "Área de foco", exact: true })
-      .click();
+    await navigateUnit(page, "Área de foco");
     await page.getByText("Temporizador", { exact: true }).click();
     await page.getByLabel("Duração em minutos").fill("1");
     await start(page);
@@ -189,9 +171,8 @@ try {
     await expect(
       page.getByRole("heading", { name: "Você fez acontecer!" }),
     ).toBeVisible();
+    await expect.poll(() => statsOf(page)).toMatchObject({ xp: 124, coins: 12 });
     stats = await statsOf(page);
-    assert.equal(stats.xp, 124);
-    assert.equal(stats.coins, 12);
     assert.equal(stats.sessions.length, 2);
   });
   console.log(

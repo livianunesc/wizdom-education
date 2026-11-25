@@ -1,4 +1,4 @@
-import { selectChoice } from "./ui-helpers.mjs";
+import { navigateUnit, selectChoice } from "./ui-helpers.mjs";
 import { chromium } from "@playwright/test";
 import assert from "node:assert/strict";
 const browser = await chromium.launch({
@@ -59,9 +59,7 @@ try {
   assert.equal(account.password, undefined);
   await page.reload();
   await page.getByRole("navigation", { name: "Navegação principal" }).waitFor();
-  await page
-    .getByRole("button", { name: /Marina Teste Sair da conta/ })
-    .click();
+  await navigateUnit(page, "Sair da conta");
   await page
     .getByRole("button", { name: "Entrar na conta", exact: true })
     .click();

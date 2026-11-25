@@ -1,5 +1,5 @@
 import { flashcards } from "../src/flashcards-data.js";
-import { selectChoice } from "./ui-helpers.mjs";
+import { navigateUnit, selectChoice } from "./ui-helpers.mjs";
 import assert from "node:assert/strict";
 import { resolve } from "node:path";
 import { readFile } from "node:fs/promises";
@@ -56,6 +56,7 @@ const readStudent = () =>
 
 try {
   await page.clock.install({ time: new Date("2026-11-13T18:00:00Z") });
+  await page.clock.pauseAt(new Date("2026-11-13T18:01:00Z"));
   try {
     await page.goto(entry);
   } catch (error) {
@@ -147,21 +148,22 @@ try {
   await expect(page.getByRole("heading", { name: /Oi, Helena/ })).toBeVisible();
   await expect(page.locator(".task-row")).toHaveCount(1);
 
-  await page.getByRole("button", { name: "Vestibulares", exact: true }).click();
+  await navigateUnit(page, "Vestibulares");
   await page
     .getByRole("button", { name: "Favoritar USP", exact: true })
     .click();
+  await expect(page.getByRole("button", { name: "Desfavoritar USP", exact: true })).toBeVisible();
   await page.reload();
-  await page.getByRole("button", { name: "Vestibulares", exact: true }).click();
+  await navigateUnit(page, "Vestibulares");
   await page
     .getByRole("button", { name: "Favoritas (1)", exact: true })
     .click();
   await expect(page.locator(".university-card")).toHaveCount(1);
-  await page.getByRole("button", { name: "Calendário", exact: true }).click();
+  await navigateUnit(page, "Calendário");
   await page.getByRole("button", { name: /^20 de novembro/ }).click();
   await expect(page.locator(".calendar-side-event")).toHaveCount(0);
 
-  await page.getByRole("button", { name: "Área de foco", exact: true }).click();
+  await navigateUnit(page, "Área de foco");
   await page.getByText("Cronômetro", { exact: true }).click();
   await page.getByRole("button", { name: "Começar meu momento" }).click();
   await page.clock.fastForward(65_000);
@@ -171,15 +173,14 @@ try {
   await expect(
     page.getByRole("heading", { name: "Você fez acontecer!" }),
   ).toBeVisible();
+  await expect.poll(async () => (await readStudent()).data.stats).toMatchObject({ xp: 24, coins: 7 });
   student = await readStudent();
-  assert.equal(student.data.stats.xp, 24);
-  assert.equal(student.data.stats.coins, 7);
   assert.equal(student.data.stats.sessions.length, 1);
   assert.equal(student.data.stats.sessions[0].seconds, 65);
   await page.getByRole("button", { name: "Guardar essa conquista" }).click();
 
   // These exact built bytes must unlock and grade reviews offline as well.
-  await page.getByRole("button", { name: "Revisões", exact: true }).click();
+  await navigateUnit(page, "Revisões");
   await page.getByRole("button", { name: "Revisar agora", exact: true }).click();
   for (let i=0;i<3;i++) {
     const question=await page.locator('.knowledge-card h2').innerText();
@@ -192,14 +193,12 @@ try {
   }
   await expect(page.getByRole('dialog')).toContainText('3/3');
   await page.getByRole('button',{name:'Guardar essa conquista'}).click();
-  student=await readStudent();
-  assert.equal(student.data.stats.xp,59);
-  assert.equal(student.data.learning.answers.length,3);
+  await expect.poll(async () => (await readStudent()).data.stats.xp).toBe(59);
+  student = await readStudent();
+  assert.equal(student.data.learning.answers.length, 3);
   await expect(page.locator('.review-metrics')).toContainText('100%');
 
-  await page
-    .getByRole("button", { name: /Helena Offline Sair da conta/ })
-    .click();
+  await navigateUnit(page, "Sair da conta");
   await page
     .getByRole("button", { name: "Entrar na conta", exact: true })
     .click();

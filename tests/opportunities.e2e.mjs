@@ -1,4 +1,4 @@
-import { selectChoice } from "./ui-helpers.mjs";
+import { navigateUnit, selectChoice } from "./ui-helpers.mjs";
 import { chromium, expect } from "@playwright/test";
 
 const origin = process.env.BASE_URL || "http://127.0.0.1:5173";
@@ -16,9 +16,7 @@ check(
   async ({ page }) => {
     await page.clock.setFixedTime(new Date("2026-11-13T12:00:00-03:00"));
     await page.goto(origin);
-    await page
-      .getByRole("button", { name: "Vestibulares", exact: true })
-      .click();
+    await navigateUnit(page, "Vestibulares");
     await expect(page.locator(".university-card")).toHaveCount(11);
     await selectChoice(page, "Curso", "Medicina");
     await selectChoice(page, "Instituição", "Pública");
@@ -43,10 +41,11 @@ check(
       .getByRole("button", { name: "Favoritar USP", exact: true })
       .click();
     await expect(page.getByRole("status")).toContainText("favorita salva");
+    await expect(usp.getByRole("button", { name: "Desfavoritar USP", exact: true })).toBeVisible();
     await page.getByRole("button", { name: "Favoritas (1)" }).click();
     await expect(page.locator(".university-card")).toHaveCount(1);
     await page.reload();
-    await page.getByRole("button", { name: "Calendário", exact: true }).click();
+    await navigateUnit(page, "Calendário");
     await expect(page.locator(".calendar-month-title h2")).toHaveText("novembro de 2026");
     await page.getByRole("button", { name: /^20 de novembro/ }).click();
     await expect(page.locator(".calendar-side-event")).toHaveCount(0);
@@ -59,7 +58,7 @@ check(
   "olympics: school eligibility and category filter work",
   async ({ page }) => {
     await page.goto(origin);
-    await page.getByRole("button", { name: "Olimpíadas", exact: true }).click();
+    await navigateUnit(page, "Olimpíadas");
     await expect(page.locator(".olympic-card")).toHaveCount(8);
     await page.getByRole("button", { name: "Matemática", exact: true }).click();
     await expect(page.locator(".olympic-card")).toHaveCount(1);
@@ -70,7 +69,7 @@ check(
       localStorage.setItem("wizdom.v1", JSON.stringify(store));
     });
     await page.reload();
-    await page.getByRole("button", { name: "Olimpíadas", exact: true }).click();
+    await navigateUnit(page, "Olimpíadas");
     await expect(
       page.getByRole("heading", { name: "Novas descobertas, no seu momento." }),
     ).toBeVisible();
@@ -83,13 +82,13 @@ check(
   "ranking: podium, participation persistence and mobile layout",
   async ({ page }) => {
     await page.goto(origin);
-    await page.getByRole("button", { name: "Ranking", exact: true }).click();
+    await navigateUnit(page, "Ranking");
     await expect(page.locator(".rank-podium-person")).toHaveCount(3);
     await expect(page.locator(".ranking-self")).toHaveCount(1);
     await page.getByRole("checkbox", { name: "Mostrar meu perfil no ranking" }).press("Space");
     await expect(page.locator(".ranking-self")).toHaveCount(0);
     await page.reload();
-    await page.getByRole("button", { name: "Ranking", exact: true }).click();
+    await navigateUnit(page, "Ranking");
     await expect(page.getByRole("checkbox", { name: "Mostrar meu perfil no ranking" })).not.toBeChecked();
     await page.getByRole("checkbox", { name: "Mostrar meu perfil no ranking" }).press("Space");
     await expect(page.locator(".ranking-self")).toHaveCount(1);
@@ -104,10 +103,7 @@ check(
     await page.setViewportSize({ width: 390, height: 844 });
     await page.goto(origin);
     for (const name of ["Vestibulares", "Calendário", "Olimpíadas"]) {
-      await page
-        .getByRole("button", { name: "Abrir menu", exact: true })
-        .click();
-      await page.getByRole("button", { name, exact: true }).click();
+      await navigateUnit(page, name);
       await expect(page.locator("h1")).toBeVisible();
       expect(
         await page.evaluate(() => document.documentElement.scrollWidth),

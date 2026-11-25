@@ -9,3 +9,19 @@ export async function selectChoice(page, label, value) {
   await combobox.click();
   await page.getByRole("option", { name: visibleLabels[value] || value, exact: true }).click();
 }
+
+// Desktop exposes common destinations directly, while the menu contains every destination.
+export async function navigateUnit(page, destination) {
+  const header = page.locator(".studio-header");
+  const toggle = header.getByRole("button", { name: "Abrir menu", exact: true });
+  await toggle.waitFor();
+  const name = destination === "Revisões" ? "Questões" : destination;
+  const direct = header.getByRole("button", { name, exact: true });
+  if (await direct.isVisible()) {
+    await direct.click();
+    return;
+  }
+  const menu = page.locator("#studio-menu");
+  if (!(await menu.isVisible())) await toggle.click();
+  await menu.getByRole("button", { name, exact: true }).click();
+}

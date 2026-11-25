@@ -1,3 +1,4 @@
+import { navigateUnit } from "./ui-helpers.mjs";
 import { chromium, expect } from "@playwright/test";
 const browser = await chromium.launch({
   executablePath: process.env.CHROMIUM_PATH || "/usr/bin/chromium",
@@ -23,7 +24,7 @@ try {
   await page
     .getByRole("button", { name: "Concluir Biologia", exact: true })
     .click();
-  await expect(page.getByRole("heading", { name: "Relembrar é evoluir." })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Questões e revisões" })).toBeVisible();
   await expect(page.locator(".learned-topic-grid > button")).toHaveCount(1);
   await expect(page.locator(".review-metrics")).toContainText("3cartões para hoje");
   await page.getByRole("button", { name: "Voltar", exact: true }).click();
@@ -41,10 +42,10 @@ try {
   await expect(
     page.getByRole("spinbutton", { name: "Duração em minutos" }),
   ).toHaveValue("25");
-  await page.getByRole("button", { name: "Revisões", exact: true }).click();
+  await navigateUnit(page, "Revisões");
   await expect(page.getByRole("button", { name: "Revisar agora" })).toBeEnabled();
   await expect(page.locator(".learned-topic-grid > button")).toHaveCount(1);
-  await page.getByRole("button", { name: "Meu espaço", exact: true }).click();
+  await navigateUnit(page, "Meu espaço");
   await page.getByRole("button", { name: "Conforto e privacidade" }).click();
   await expect(page.getByRole("dialog")).toBeVisible();
   await page.getByLabel("Texto maior").check();
@@ -55,9 +56,8 @@ try {
   await expect(
     page.getByRole("button", { name: "Abrir menu", exact: true }),
   ).toBeVisible();
-  await page.getByRole("button", { name: "Abrir menu", exact: true }).click();
-  await page.getByRole("button", { name: "Cronograma", exact: true }).click();
-  await expect(page.locator(".sidebar")).not.toHaveClass(/open/);
+  await navigateUnit(page, "Cronograma");
+  await expect(page.locator("#studio-menu")).toBeHidden();
   await expect(
     page.getByRole("heading", { name: "Meu cronograma" }),
   ).toBeVisible();
