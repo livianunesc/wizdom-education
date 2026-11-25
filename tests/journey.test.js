@@ -81,3 +81,22 @@ test('expired invitations and cancelled rooms cannot award a session', () => {
   assert.equal(act({ ...a, action: 'leave' }).state, 'cancelled');
   assert.throws(() => act({ ...a, action: 'claim' }), /Concluam/);
 });
+
+test('a pause near the deadline preserves the time that only one participant confirmed', () => {
+  let clock = 0;
+  const act = duoService(() => clock);
+  const a = act({ action: 'create', name: 'Lia', minutes: 1 });
+  const b = act({ action: 'join', code: a.code, name: 'Sol' });
+  const send = (player, action) => act({ action, code: player.code, token: player.token });
+  send(a, 'ready');
+  send(b, 'ready');
+  for (clock = 5000; clock < 60_000; clock += 5000) {
+    send(a, 'status');
+    send(b, 'status');
+  }
+  clock = 61_000;
+  assert.equal(send(a, 'pause').remaining, 5000);
+  assert.equal(send(a, 'ready').state, 'paused');
+  assert.equal(send(b, 'ready').endAt, 66_000);
+  assert.throws(() => send(a, 'claim'), /Concluam/);
+});

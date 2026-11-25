@@ -8,6 +8,14 @@ export function duoService(now = Date.now) {
   const rooms = new Map();
   const fail = (message, status = 400) => { throw Object.assign(new Error(message), { status }); };
 
+  function freeze(room) {
+    const lastTogether = Math.min(...room.players.map(player => player.seen));
+    const confirmed = Math.max(0, lastTogether - room.since);
+    room.remaining = Math.max(0, room.remaining - confirmed);
+    room.state = 'paused';
+    room.players.forEach(player => { player.ready = false; });
+  }
+
   function settle(room, time) {
     if (room.state !== 'running') return;
     const end = room.since + room.remaining;
@@ -17,9 +25,7 @@ export function duoService(now = Date.now) {
       room.remaining = 0;
     } else if (connectedUntil <= time) {
       // Discard the interval since the last confirmation from both participants.
-      room.remaining = Math.max(0, end - Math.max(room.since, Math.min(...room.players.map(player => player.seen))));
-      room.state = 'paused';
-      room.players.forEach(player => { player.ready = false; });
+      freeze(room);
     }
   }
 
@@ -56,11 +62,7 @@ export function duoService(now = Date.now) {
           room.since = time;
         }
       }
-      if (action === 'pause' && room.state === 'running') {
-        room.remaining -= time - room.since;
-        room.state = 'paused';
-        room.players.forEach(item => { item.ready = false; });
-      }
+      if (action === 'pause' && room.state === 'running') freeze(room);
       if (action === 'leave' && !['completed', 'cancelled'].includes(room.state)) room.state = 'cancelled';
       if (action === 'claim' && room.state !== 'completed') fail('Concluam a sessão juntos antes de resgatar.', 409);
       if (!['status', 'ready', 'pause', 'leave', 'claim'].includes(action)) fail('Ação desconhecida.');
